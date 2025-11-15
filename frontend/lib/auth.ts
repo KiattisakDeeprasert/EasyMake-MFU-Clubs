@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export type Role = "user" | "club-leader" | "co-leader" | "super-admin" | null;
 
-function readCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const m = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(name + "="));
-  return m ? decodeURIComponent(m.split("=")[1]) : null;
-}
+export function useRole(): Role | undefined {
+  const [role, setRole] = useState<Role | undefined>(undefined);
+  const pathname = usePathname(); 
 
-export function useRole(): { role: Role; ready: boolean } {
-  const [role, setRole] = useState<Role>(null);
-  const [ready, setReady] = useState(false);
+  function readCookie(name: string): string | null {
+    if (typeof document === "undefined") return null;
+    const m = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return m ? decodeURIComponent(m.split("=")[1]) : null;
+  }
 
   useEffect(() => {
     const cookieRole = readCookie("role");
@@ -29,9 +30,7 @@ export function useRole(): { role: Role; ready: boolean } {
     } else {
       setRole(null);
     }
+  }, [pathname]); 
 
-    setReady(true); 
-  }, []);
-
-  return { role, ready };
+  return role;
 }

@@ -52,7 +52,7 @@ export function AdminLoginCard() {
         return;
       }
 
-      router.replace("/admin");
+      window.location.href = "/admin";
       setSubmitting(false);
     } catch (err: any) {
       setError(err.message || "Login failed");
