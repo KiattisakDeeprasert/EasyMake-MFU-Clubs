@@ -17,19 +17,9 @@ export function Navigation() {
   const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
-    const cookieRole = getCookie("role");
-
-    if (
-      cookieRole === "user" ||
-      cookieRole === "club-leader" ||
-      cookieRole === "co-leader" ||
-      cookieRole === "super-admin"
-    ) {
-      setHasToken(true); 
-    } else {
-      setHasToken(false);
-    }
-  }, [pathname]); 
+    const token = getCookie("token");
+    setHasToken(!!token);
+  }, []);
 
   const navItems = [
     { href: "/user", label: "Home" },

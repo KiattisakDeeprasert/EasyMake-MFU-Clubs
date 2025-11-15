@@ -19,7 +19,7 @@ function setAuthCookies(
 
   res.cookie("token", token, {
     ...baseOptions,
-    httpOnly: true,
+    httpOnly: false,
   });
 
   res.cookie("role", role, {
