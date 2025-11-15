@@ -1,36 +1,49 @@
+// lib/auth.ts
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { getMe } from "@/services/authService";
 
 export type Role = "user" | "club-leader" | "co-leader" | "super-admin" | null;
 
-export function useRole(): Role | undefined {
-  const [role, setRole] = useState<Role | undefined>(undefined);
-  const pathname = usePathname(); 
-
-  function readCookie(name: string): string | null {
-    if (typeof document === "undefined") return null;
-    const m = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(name + "="));
-    return m ? decodeURIComponent(m.split("=")[1]) : null;
-  }
+export function useAuth() {
+  const [role, setRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const cookieRole = readCookie("role");
+    let cancelled = false;
 
-    if (
-      cookieRole === "club-leader" ||
-      cookieRole === "co-leader" ||
-      cookieRole === "super-admin" ||
-      cookieRole === "user"
-    ) {
-      setRole(cookieRole as Role);
-    } else {
-      setRole(null);
-    }
-  }, [pathname]); 
+    (async () => {
+      try {
+        const me = await getMe(); // เรียก /me พร้อม credentials: "include"
+        if (cancelled) return;
 
-  return role;
+        if (
+          me &&
+          (me.role === "user" ||
+            me.role === "club-leader" ||
+            me.role === "co-leader" ||
+            me.role === "super-admin")
+        ) {
+          setRole(me.role as Role);
+        } else {
+          setRole(null);
+        }
+      } catch (_err) {
+        if (!cancelled) {
+          setRole(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { role, loading };
 }

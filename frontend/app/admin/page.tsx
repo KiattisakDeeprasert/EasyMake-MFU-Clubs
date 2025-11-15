@@ -1,12 +1,12 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { useRole } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const role = useRole();
+   const { role, loading } = useAuth();
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
       </motion.header>
 
       {/* Role-specific Quick Cards */}
-      {role === "club-leader" && (
+      {role === "club-leader" && !loading && (
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
         </motion.div>
       )}
 
-      {role === "super-admin" && (
+      {role === "super-admin" && !loading && (
         <motion.div
           variants={containerVariants}
           initial="hidden"

@@ -1,14 +1,15 @@
+// app/admin/layout.tsx
 "use client";
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useRole } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const role = useRole(); 
+  const { role, loading } = useAuth();
 
   const isPublic =
     pathname === "/admin/login" ||
@@ -17,15 +18,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (isPublic) return;
-    
-    if (role === undefined) return;
+    if (loading) return;
 
-    if (role === null) {
+    if (!role || role === "user") {
       router.replace("/admin/login");
     }
-  }, [role, isPublic, router]);
+  }, [isPublic, loading, role, router]);
 
-  if (!isPublic && role === undefined) {
+  if (!isPublic && loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-sm text-gray-500">Checking your session...</p>
@@ -33,6 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
+  // public routes (login / not-authorized) ไม่ต้องมี sidebar
   if (isPublic) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
