@@ -8,7 +8,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const role = useRole();
+  const role = useRole(); 
 
   const isPublic =
     pathname === "/admin/login" ||
@@ -16,12 +16,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     pathname === "/admin/not-authorized";
 
   useEffect(() => {
-    if (!isPublic) {
-      if (role === null) {
-        router.replace("/admin/login");
-      }
+    if (isPublic) return;
+    
+    if (role === undefined) return;
+
+    if (role === null) {
+      router.replace("/admin/login");
     }
   }, [role, isPublic, router]);
+
+  if (!isPublic && role === undefined) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-sm text-gray-500">Checking your session...</p>
+      </div>
+    );
+  }
 
   if (isPublic) {
     return (
