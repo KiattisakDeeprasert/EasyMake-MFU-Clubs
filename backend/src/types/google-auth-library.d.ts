@@ -1,4 +1,8 @@
 declare module "google-auth-library" {
-  export const OAuth2Client: any;
+  export class OAuth2Client {
+    constructor(...args: any[]);
+    verifyIdToken(...args: any[]): Promise<any>;
+  }
+
   export default OAuth2Client;
 }
