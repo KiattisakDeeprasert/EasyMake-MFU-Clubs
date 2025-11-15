@@ -44,7 +44,30 @@ export function useAuth() {
   return { role, loading };
 }
 
-export function useRole(): Role | null {
-  const { role } = useAuth();
-  return role;
+export function useRole(): Role | undefined {
+  const [role, setRole] = useState<Role | undefined>(undefined);
+
+  function readCookie(name: string): string | null {
+    if (typeof document === "undefined") return null;
+    const m = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return m ? decodeURIComponent(m.split("=")[1]) : null;
+  }
+
+  useEffect(() => {
+    const cookieRole = readCookie("role");
+    if (
+      cookieRole === "club-leader" ||
+      cookieRole === "co-leader" ||
+      cookieRole === "super-admin" ||
+      cookieRole === "user"
+    ) {
+      setRole(cookieRole as Role);
+    } else {
+      setRole(null);
+    }
+  }, []);
+
+  return role; 
 }

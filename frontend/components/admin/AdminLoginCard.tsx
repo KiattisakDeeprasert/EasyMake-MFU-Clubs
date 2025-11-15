@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { ErrorAlert } from "./ErrorAlert";
 import { loginRequest } from "@/services/authService";
+import { useRole } from "@/lib/auth";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -16,7 +17,7 @@ function getCookie(name: string): string | null {
 
 export function AdminLoginCard() {
   const router = useRouter();
-
+  const role = useRole();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -32,7 +33,7 @@ export function AdminLoginCard() {
     ) {
       router.replace("/admin/");
     }
-  }, [router]);
+  }, [role, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,7 +53,7 @@ export function AdminLoginCard() {
         return;
       }
 
-      router.replace("/admin");;
+      router.replace("/admin");
       setSubmitting(false);
     } catch (err: any) {
       setError(err.message || "Login failed");
