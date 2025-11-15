@@ -1,33 +1,40 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
+import React, { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useRole } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
+  const role = useRole();
 
-  const isPublicAdminRoute =
+  const isPublic =
     pathname === "/admin/login" ||
     pathname?.startsWith("/admin/login") ||
     pathname === "/admin/not-authorized";
 
-  if (isPublicAdminRoute) {
+  useEffect(() => {
+    if (!isPublic) {
+      if (role === null) {
+        router.replace("/admin/login");
+      }
+    }
+  }, [role, isPublic, router]);
+
+  if (isPublic) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white text-gray-900">
+    <div className="flex h-screen overflow-hidden bg-white">
       <AdminSidebar />
-      <main className="flex-1 h-screen overflow-y-auto bg-gray-50 p-6">
+      <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
         {children}
       </main>
     </div>

@@ -17,10 +17,11 @@ export function useRole(): Role {
 
   useEffect(() => {
     const cookieRole = readCookie("role");
+
     if (
+      cookieRole === "super-admin" ||
       cookieRole === "club-leader" ||
       cookieRole === "co-leader" ||
-      cookieRole === "super-admin" ||
       cookieRole === "user"
     ) {
       setRole(cookieRole as Role);

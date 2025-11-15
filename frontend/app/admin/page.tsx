@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
       y: 0,
       transition: {
         duration: 0.35,
-        ease: "easeOut", // ✅ เปลี่ยนจาก array มาใช้ string ที่ type รองรับชัวร์
+        ease: "easeOut", 
       },
     },
   };
