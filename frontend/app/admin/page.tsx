@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const role = useRole();
+    const { role, ready } = useRole();
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
