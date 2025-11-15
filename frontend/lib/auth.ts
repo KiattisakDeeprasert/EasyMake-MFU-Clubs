@@ -15,7 +15,7 @@ export function useAuth() {
 
     (async () => {
       try {
-        const me = await getMe(); // เรียก /me พร้อม credentials: "include"
+        const me = await getMe(); 
         if (cancelled) return;
 
         if (
@@ -29,14 +29,10 @@ export function useAuth() {
         } else {
           setRole(null);
         }
-      } catch (_err) {
-        if (!cancelled) {
-          setRole(null);
-        }
+      } catch {
+        if (!cancelled) setRole(null);
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     })();
 
@@ -46,4 +42,9 @@ export function useAuth() {
   }, []);
 
   return { role, loading };
+}
+
+export function useRole(): Role | null {
+  const { role } = useAuth();
+  return role;
 }
