@@ -17,9 +17,17 @@ export function Navigation() {
   const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
-    const token = getCookie("token");
-    setHasToken(!!token);
-  }, []);
+    // 🔥 ใช้ role แทน token เพราะ token เป็น httpOnly อ่านไม่ได้
+    const cookieRole = getCookie("role");
+
+    const loggedIn =
+      cookieRole === "user" ||
+      cookieRole === "club-leader" ||
+      cookieRole === "co-leader" ||
+      cookieRole === "super-admin";
+
+    setHasToken(loggedIn);
+  }, [pathname]); // เช็คใหม่ทุกครั้งที่เปลี่ยนหน้า (หลัง login redirect)
 
   const navItems = [
     { href: "/user", label: "Home" },
