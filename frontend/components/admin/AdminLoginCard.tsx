@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { ErrorAlert } from "./ErrorAlert";
 import { loginRequest } from "@/services/authService";
-import { useRole } from "@/lib/auth";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -17,13 +16,12 @@ function getCookie(name: string): string | null {
 
 export function AdminLoginCard() {
   const router = useRouter();
-  const role = useRole();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // ⛔️ ห้ามใช้ useRole ในหน้า login !!!!
   useEffect(() => {
     const cookieRole = getCookie("role");
     if (
@@ -31,9 +29,9 @@ export function AdminLoginCard() {
       cookieRole === "club-leader" ||
       cookieRole === "co-leader"
     ) {
-      router.replace("/admin/");
+      window.location.href = "/admin"; // force reload
     }
-  }, [role, router]);
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,8 +51,8 @@ export function AdminLoginCard() {
         return;
       }
 
-      router.replace("/admin");
-      setSubmitting(false);
+      // ⛔️ ไม่ใช้ router.replace !!!
+      window.location.href = "/admin"; // reload fully → cookie อ่านได้ชัวร์
     } catch (err: any) {
       setError(err.message || "Login failed");
       setSubmitting(false);
@@ -104,6 +102,7 @@ export function AdminLoginCard() {
       initial="hidden"
       animate="show"
     >
+      {/* HEADER */}
       <motion.div className="space-y-2 text-center" variants={itemVariants}>
         <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wide font-medium">
           EasyMake • MFU Clubs
@@ -143,7 +142,6 @@ export function AdminLoginCard() {
               if (error) setError("");
             }}
             required
-            autoComplete="email"
             disabled={submitting}
           />
         </div>
@@ -168,7 +166,6 @@ export function AdminLoginCard() {
               if (error) setError("");
             }}
             required
-            autoComplete="current-password"
             disabled={submitting}
           />
         </div>
@@ -185,19 +182,9 @@ export function AdminLoginCard() {
             hover:bg-gray-800
             active:scale-[0.99]
           "
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.98 }}
         >
           {submitting ? "Signing in..." : "Sign in"}
         </motion.button>
-
-        <motion.p
-          className="text-[11px] text-center text-gray-400 leading-relaxed"
-          variants={itemVariants}
-        >
-          By signing in you agree that you are authorized MFU staff/club
-          personnel. Unauthorized access is prohibited.
-        </motion.p>
       </motion.form>
     </motion.div>
   );
