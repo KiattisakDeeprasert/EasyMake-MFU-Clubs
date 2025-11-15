@@ -52,14 +52,8 @@ export function AdminLoginCard() {
         return;
       }
 
-      // ✅ Store clubId in localStorage for quick frontend access
-      if (result.user.clubId) {
-        localStorage.setItem("clubId", result.user.clubId);
-      } else {
-        localStorage.removeItem("clubId");
-      }
-
-      router.push("/admin/");
+      router.replace("/admin");
+      setSubmitting(false);
     } catch (err: any) {
       setError(err.message || "Login failed");
       setSubmitting(false);

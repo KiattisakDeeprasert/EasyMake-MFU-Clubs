@@ -10,16 +10,19 @@ function setAuthCookies(
 ) {
   const isProd = process.env.NODE_ENV === "production";
 
+  const domain = isProd ? ".easy-make-mfu-clubs.vercel.app" : "localhost";
+
   const baseOptions = {
     secure: isProd,
     sameSite: isProd ? ("none" as const) : ("lax" as const),
     path: "/",
+    domain,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   res.cookie("token", token, {
     ...baseOptions,
-    httpOnly: false,
+    httpOnly: true,
   });
 
   res.cookie("role", role, {
@@ -38,7 +41,7 @@ function setAuthCookies(
       httpOnly: false,
     });
   } else {
-    res.clearCookie("clubId", { path: "/" });
+    res.clearCookie("clubId", { path: "/", domain });
   }
 }
 
