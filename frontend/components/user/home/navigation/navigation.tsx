@@ -7,27 +7,40 @@ import { motion } from "framer-motion";
 import { Menu, X, User, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getCookie } from "cookies-next";
 import UserMenu from "./UserMenu";
 import { NotificationBellContainer } from "../../notifications/NotificationBellContainer";
+import { getMe } from "@/services/authService";
 
 export function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hasToken, setHasToken] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // 🔥 ใช้ role แทน token เพราะ token เป็น httpOnly อ่านไม่ได้
-    const cookieRole = getCookie("role");
+    let cancelled = false;
 
-    const loggedIn =
-      cookieRole === "user" ||
-      cookieRole === "club-leader" ||
-      cookieRole === "co-leader" ||
-      cookieRole === "super-admin";
+    (async () => {
+      try {
+        const me = await getMe(); 
+        if (!cancelled) {
+          setIsLoggedIn(!!me);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsLoggedIn(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setChecking(false);
+        }
+      }
+    })();
 
-    setHasToken(loggedIn);
-  }, [pathname]); // เช็คใหม่ทุกครั้งที่เปลี่ยนหน้า (หลัง login redirect)
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]); 
 
   const navItems = [
     { href: "/user", label: "Home" },
@@ -87,24 +100,29 @@ export function Navigation() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 shrink-0 z-10">
-            {hasToken ? (
+            {/* ตอนกำลังเช็ค /me อยู่จะยังไม่แสดงอะไร เพื่อลดกระพริบ */}
+            {!checking && (
               <>
-                <div className="hidden md:flex">
-                  <NotificationBellContainer />
-                </div>
-                <div className="hidden md:flex">
-                  <UserMenu />
-                </div>
+                {isLoggedIn ? (
+                  <>
+                    <div className="hidden md:flex">
+                      <NotificationBellContainer />
+                    </div>
+                    <div className="hidden md:flex">
+                      <UserMenu />
+                    </div>
+                  </>
+                ) : (
+                  <Button
+                    asChild
+                    variant="default"
+                    size="sm"
+                    className="hidden md:flex"
+                  >
+                    <Link href="/user/auth/login">Login</Link>
+                  </Button>
+                )}
               </>
-            ) : (
-              <Button
-                asChild
-                variant="default"
-                size="sm"
-                className="hidden md:flex"
-              >
-                <Link href="/user/auth/login">Login</Link>
-              </Button>
             )}
 
             <Button
@@ -148,27 +166,32 @@ export function Navigation() {
                   </Link>
                 );
               })}
+
               <div className="flex gap-2 pt-2 border-t border-border">
-                {hasToken ? (
+                {!checking && (
                   <>
-                    <Button variant="ghost" size="sm" className="flex-1">
-                      <Bell className="w-4 h-4 mr-2" />
-                      Notifications
-                    </Button>
-                    <Button variant="ghost" size="sm" className="flex-1">
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
-                    </Button>
+                    {isLoggedIn ? (
+                      <>
+                        <Button variant="ghost" size="sm" className="flex-1">
+                          <Bell className="w-4 h-4 mr-2" />
+                          Notifications
+                        </Button>
+                        <Button variant="ghost" size="sm" className="flex-1">
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        asChild
+                        variant="default"
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <Link href="/user/auth/login">Login</Link>
+                      </Button>
+                    )}
                   </>
-                ) : (
-                  <Button
-                    asChild
-                    variant="default"
-                    size="sm"
-                    className="flex-1"
-                  >
-                    <Link href="/user/auth/login">Login</Link>
-                  </Button>
                 )}
               </div>
             </div>
