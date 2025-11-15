@@ -8,26 +8,27 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const role = useRole(); // "loading" | Role
+  const role = useRole(); // Role | undefined
 
   const isPublic =
     pathname === "/admin/login" ||
     pathname?.startsWith("/admin/login") ||
     pathname === "/admin/not-authorized";
 
-  // redirect เฉพาะหน้า private และเฉพาะตอน role รู้ค่าแล้ว
   useEffect(() => {
     if (isPublic) return;
 
-    if (role === "loading") return; // รออ่าน cookie ก่อน
+    // ยังอ่าน cookie ไม่เสร็จ
+    if (role === undefined) return;
 
-    if (role === null) {
+    // ถ้าไม่มี session หรือเป็น user ธรรมดา -> เด้งไปหน้า login
+    if (role === null || role === "user") {
       router.replace("/admin/login");
     }
   }, [role, isPublic, router]);
 
-  // ระหว่างรออ่าน cookie
-  if (!isPublic && role === "loading") {
+  // ระหว่างรออ่าน cookie (เฉพาะหน้า private)
+  if (!isPublic && role === undefined) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-sm text-gray-500">Checking your session...</p>
@@ -44,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // หน้า private + role มีค่าแล้ว
+  // หน้า private + role รู้ค่าแล้ว && ไม่ใช่ user ธรรมดา
   return (
     <div className="flex h-screen overflow-hidden bg-white">
       <AdminSidebar />
