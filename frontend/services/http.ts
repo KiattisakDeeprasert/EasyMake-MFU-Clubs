@@ -4,7 +4,8 @@ export async function authedFetch(
   path: string,
   options: RequestInit & { requireJson?: boolean } = {}
 ) {
-  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+  const isForm =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,

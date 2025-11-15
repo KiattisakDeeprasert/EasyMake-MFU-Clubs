@@ -1,4 +1,4 @@
-import { BASE_URL } from "./http";
+import { authedFetch, BASE_URL } from "./http";
 
 export type LoginSuccessResponse = {
   token: string;
@@ -53,9 +53,12 @@ export async function loginWithGoogleIdToken(idToken: string) {
 }
 
 export async function getMe() {
-  const res = await fetch(`${BASE_URL}/me`, {
-    credentials: "include",
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const data = await authedFetch("/me", {
+      method: "GET",
+    });
+    return data; 
+  } catch (e: any) {
+    return null;
+  }
 }
