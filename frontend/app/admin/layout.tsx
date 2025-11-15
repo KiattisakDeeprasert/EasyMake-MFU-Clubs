@@ -8,32 +8,27 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { role, ready } = useAuth();
+  const { role, loading } = useAuth();
 
   const isPublic =
     pathname === "/admin/login" ||
     pathname?.startsWith("/admin/login") ||
     pathname === "/admin/not-authorized";
 
+  const isAdminRole =
+    role === "super-admin" || role === "club-leader" || role === "co-leader";
+
   useEffect(() => {
-    // หน้า public ไม่ต้องเช็ค
-    if (isPublic) return;
+    if (loading) return;       // รออ่าน cookie ให้จบก่อน
+    if (isPublic) return;      // หน้า public ไม่ต้องบังคับ login
 
-    // ยังอ่าน cookie ไม่เสร็จ
-    if (!ready) return;
-
-    // ถ้าไม่ใช่ role admin → เด้งกลับหน้า login
-    if (
-      role !== "super-admin" &&
-      role !== "club-leader" &&
-      role !== "co-leader"
-    ) {
+    if (!isAdminRole) {
       router.replace("/admin/login");
     }
-  }, [isPublic, ready, role, router]);
+  }, [loading, isPublic, isAdminRole, router]);
 
-  // รออ่าน cookie ก่อน สำหรับหน้า private
-  if (!isPublic && !ready) {
+  // ระหว่างรออ่าน cookie + ไม่ใช่หน้า public
+  if (!isPublic && loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-sm text-gray-500">Checking your session...</p>
@@ -50,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // หน้า admin ปกติ
+  // หน้า private + admin role แล้ว
   return (
     <div className="flex h-screen overflow-hidden bg-white">
       <AdminSidebar />

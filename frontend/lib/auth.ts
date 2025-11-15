@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export type Role = "user" | "club-leader" | "co-leader" | "super-admin" | null;
 
 export type AuthState = {
-  ready: boolean;          // อ่าน cookie เสร็จหรือยัง
+  loading: boolean;
   role: Role;
   email: string | null;
   token: string | null;
@@ -14,20 +14,15 @@ export type AuthState = {
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
-  // แก้ให้ทนทาน: split ด้วย ';' แล้ว trim ช่องว่าง
-  const parts = document.cookie.split(";");
-  for (const part of parts) {
-    const [key, ...rest] = part.split("=");
-    if (key.trim() === name) {
-      return decodeURIComponent(rest.join("="));
-    }
-  }
-  return null;
+  const match = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(name + "="));
+  return match ? decodeURIComponent(match.split("=")[1]) : null;
 }
 
 export function useAuth(): AuthState {
-  const [state, setState] = useState<AuthState>({
-    ready: false,
+  const [auth, setAuth] = useState<AuthState>({
+    loading: true,
     role: null,
     email: null,
     token: null,
@@ -36,6 +31,7 @@ export function useAuth(): AuthState {
 
   useEffect(() => {
     const roleCookie = readCookie("role");
+
     const role: Role =
       roleCookie === "user" ||
       roleCookie === "club-leader" ||
@@ -48,8 +44,8 @@ export function useAuth(): AuthState {
     const token = readCookie("token");
     const clubId = readCookie("clubId");
 
-    setState({
-      ready: true,
+    setAuth({
+      loading: false,
       role,
       email,
       token,
@@ -57,7 +53,7 @@ export function useAuth(): AuthState {
     });
   }, []);
 
-  return state;
+  return auth;
 }
 
 export function useRole(): Role {

@@ -16,25 +16,21 @@ function getCookie(name: string): string | null {
 }
 
 export function AdminLoginCard() {
-   const router = useRouter();
-  const { role, ready } = useAuth();
+  const router = useRouter();
+  const { role, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // ถ้า login อยู่แล้ว → เด้งไป /admin
+  const isAdminRole =
+    role === "super-admin" || role === "club-leader" || role === "co-leader";
   useEffect(() => {
-    if (!ready) return;
-    if (
-      role === "super-admin" ||
-      role === "club-leader" ||
-      role === "co-leader"
-    ) {
+    if (!loading && isAdminRole) {
       router.replace("/admin");
     }
-  }, [ready, role, router]);
+  }, [loading, isAdminRole, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,7 +56,6 @@ export function AdminLoginCard() {
       setSubmitting(false);
     }
   }
-
   const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.9, y: 20 },
     show: {
