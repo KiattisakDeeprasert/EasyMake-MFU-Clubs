@@ -6,7 +6,9 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function AdminDashboardPage() {
-   const { role, loading } = useAuth();
+  const auth = useAuth();          // AuthState | undefined
+  const role = auth?.role ?? null; // Role | null
+  const loading = auth === undefined;
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -25,7 +27,7 @@ export default function AdminDashboardPage() {
       y: 0,
       transition: {
         duration: 0.35,
-        ease: "easeOut", 
+        ease: "easeOut",
       },
     },
   };
@@ -44,8 +46,25 @@ export default function AdminDashboardPage() {
         </p>
       </motion.header>
 
+      {/* ระหว่างโหลด role */}
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-gray-500 flex items-center gap-2"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Sparkles className="w-4 h-4" />
+          </motion.div>
+          Loading role...
+        </motion.div>
+      )}
+
       {/* Role-specific Quick Cards */}
-      {role === "club-leader" && !loading && (
+      {!loading && role === "club-leader" && (
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -86,7 +105,7 @@ export default function AdminDashboardPage() {
         </motion.div>
       )}
 
-      {role === "super-admin" && !loading && (
+      {!loading && role === "super-admin" && (
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -118,22 +137,6 @@ export default function AdminDashboardPage() {
           </motion.div>
         </motion.div>
       )}
-
-      {!role && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-gray-500 flex items-center gap-2"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          >
-            <Sparkles className="w-4 h-4" />
-          </motion.div>
-          Loading role...
-        </motion.div>
-      )}
     </section>
   );
 }
@@ -158,7 +161,6 @@ function QuickCard({
           transition-all duration-200 cursor-pointer relative overflow-hidden
         "
       >
-        {/* Subtle hover glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
         <div className="relative space-y-1">
