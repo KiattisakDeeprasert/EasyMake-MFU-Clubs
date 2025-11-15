@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { ErrorAlert } from "./ErrorAlert";
 import { loginRequest } from "@/services/authService";
+import { useAuth } from "@/lib/auth";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -15,23 +16,25 @@ function getCookie(name: string): string | null {
 }
 
 export function AdminLoginCard() {
-  const router = useRouter();
+   const router = useRouter();
+  const { role, ready } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // ⛔️ ห้ามใช้ useRole ในหน้า login !!!!
+  // ถ้า login อยู่แล้ว → เด้งไป /admin
   useEffect(() => {
-    const cookieRole = getCookie("role");
+    if (!ready) return;
     if (
-      cookieRole === "super-admin" ||
-      cookieRole === "club-leader" ||
-      cookieRole === "co-leader"
+      role === "super-admin" ||
+      role === "club-leader" ||
+      role === "co-leader"
     ) {
-      window.location.href = "/admin"; // force reload
+      router.replace("/admin");
     }
-  }, []);
+  }, [ready, role, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,8 +54,7 @@ export function AdminLoginCard() {
         return;
       }
 
-      // ⛔️ ไม่ใช้ router.replace !!!
-      window.location.href = "/admin"; // reload fully → cookie อ่านได้ชัวร์
+      router.replace("/admin");
     } catch (err: any) {
       setError(err.message || "Login failed");
       setSubmitting(false);

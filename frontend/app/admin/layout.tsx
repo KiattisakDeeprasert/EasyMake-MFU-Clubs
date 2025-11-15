@@ -2,13 +2,13 @@
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useRole } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const role = useRole(); // Role | undefined
+  const { role, ready } = useAuth();
 
   const isPublic =
     pathname === "/admin/login" ||
@@ -16,19 +16,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     pathname === "/admin/not-authorized";
 
   useEffect(() => {
+    // หน้า public ไม่ต้องเช็ค
     if (isPublic) return;
 
     // ยังอ่าน cookie ไม่เสร็จ
-    if (role === undefined) return;
+    if (!ready) return;
 
-    // ถ้าไม่มี session หรือเป็น user ธรรมดา -> เด้งไปหน้า login
-    if (role === null || role === "user") {
+    // ถ้าไม่ใช่ role admin → เด้งกลับหน้า login
+    if (
+      role !== "super-admin" &&
+      role !== "club-leader" &&
+      role !== "co-leader"
+    ) {
       router.replace("/admin/login");
     }
-  }, [role, isPublic, router]);
+  }, [isPublic, ready, role, router]);
 
-  // ระหว่างรออ่าน cookie (เฉพาะหน้า private)
-  if (!isPublic && role === undefined) {
+  // รออ่าน cookie ก่อน สำหรับหน้า private
+  if (!isPublic && !ready) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-sm text-gray-500">Checking your session...</p>
@@ -36,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // หน้า public (login / not-authorized)
+  // หน้า login / not-authorized
   if (isPublic) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -45,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // หน้า private + role รู้ค่าแล้ว && ไม่ใช่ user ธรรมดา
+  // หน้า admin ปกติ
   return (
     <div className="flex h-screen overflow-hidden bg-white">
       <AdminSidebar />

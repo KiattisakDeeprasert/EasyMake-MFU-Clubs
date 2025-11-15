@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 export type Role = "user" | "club-leader" | "co-leader" | "super-admin" | null;
 
-type AuthState = {
+export type AuthState = {
+  ready: boolean;          // อ่าน cookie เสร็จหรือยัง
   role: Role;
   email: string | null;
   token: string | null;
@@ -13,19 +14,25 @@ type AuthState = {
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(name + "="));
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
+  // แก้ให้ทนทาน: split ด้วย ';' แล้ว trim ช่องว่าง
+  const parts = document.cookie.split(";");
+  for (const part of parts) {
+    const [key, ...rest] = part.split("=");
+    if (key.trim() === name) {
+      return decodeURIComponent(rest.join("="));
+    }
+  }
+  return null;
 }
 
-/**
- * ใช้อ่าน auth จาก cookie ครั้งเดียวตอน mount แล้วเก็บไว้ใน state
- * - ระหว่างโหลด: return undefined
- * - ถ้าไม่มี session: role = null, email/token/clubId = null
- */
-export function useAuth(): AuthState | undefined {
-  const [auth, setAuth] = useState<AuthState | undefined>(undefined);
+export function useAuth(): AuthState {
+  const [state, setState] = useState<AuthState>({
+    ready: false,
+    role: null,
+    email: null,
+    token: null,
+    clubId: null,
+  });
 
   useEffect(() => {
     const roleCookie = readCookie("role");
@@ -41,7 +48,8 @@ export function useAuth(): AuthState | undefined {
     const token = readCookie("token");
     const clubId = readCookie("clubId");
 
-    setAuth({
+    setState({
+      ready: true,
       role,
       email,
       token,
@@ -49,13 +57,9 @@ export function useAuth(): AuthState | undefined {
     });
   }, []);
 
-  return auth;
+  return state;
 }
 
-/**
- * hook เดิมเอาไว้ใช้เฉพาะ role อย่างเดียว
- */
-export function useRole(): Role | undefined {
-  const auth = useAuth();
-  return auth?.role;
+export function useRole(): Role {
+  return useAuth().role;
 }
