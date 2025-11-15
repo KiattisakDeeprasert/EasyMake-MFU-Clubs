@@ -10,37 +10,32 @@ function setAuthCookies(
 ) {
   const isProd = process.env.NODE_ENV === "production";
 
-  res.cookie("token", token, {
-    httpOnly: false,
+  const baseOptions = {
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    sameSite: isProd ? ("none" as const) : ("lax" as const),
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  res.cookie("token", token, {
+    ...baseOptions,
+    httpOnly: true,
   });
 
   res.cookie("role", role, {
+    ...baseOptions,
     httpOnly: false,
-    secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   res.cookie("email", email, {
+    ...baseOptions,
     httpOnly: false,
-    secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   if (clubId) {
     res.cookie("clubId", clubId, {
+      ...baseOptions,
       httpOnly: false,
-      secure: isProd,
-      sameSite: isProd ? "strict" : "lax",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   } else {
     res.clearCookie("clubId", { path: "/" });

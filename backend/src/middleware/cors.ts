@@ -1,14 +1,20 @@
 import cors from "cors";
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://easy-make-mfu-clubs.vercel.app",
+];
+
 export const corsMiddleware = cors({
   origin: (origin, callback) => {
-    const allowedOrigins = ["http://localhost:3000"];
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    if (!origin) {
+      return callback(null, true);
     }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.log("❌ Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true, 
-  optionsSuccessStatus: 200, 
+  credentials: true,
 });
