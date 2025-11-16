@@ -106,18 +106,34 @@ export async function createActivity(
 ) {
   const fd = new FormData();
   Object.entries(payload).forEach(([k, v]) => {
-    if (v !== undefined && v !== null) {
-      if (k === "images" && Array.isArray(v)) {
-        v.forEach((f) => fd.append("images", f));
-      } else {
-        fd.append(k, String(v));
-      }
+    if (v === undefined || v === null) return;
+    if (k === "images" && Array.isArray(v)) {
+      v.forEach((f) => fd.append("images", f));
+    } else {
+      fd.append(k, String(v));
     }
   });
-  return authedFetch(`/clubs/${clubId}/activities`, {
+
+  const res = await fetch(`${BASE_URL}/clubs/${clubId}/activities`, {
     method: "POST",
     body: fd,
+    credentials: "include",
   });
+
+  if (!res.ok) {
+    let message = `Create failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) message = data.message;
+    } catch (_) {
+    }
+    throw new Error(message);
+  }
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
 }
 
 export async function updateActivityDetailsWithImages(

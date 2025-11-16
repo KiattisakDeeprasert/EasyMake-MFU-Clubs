@@ -1,4 +1,4 @@
-import { authedFetch } from "./http";
+import { authedFetch, BASE_URL } from "./http";
 
 export type StaffPostRow = {
   _id: string;
@@ -58,11 +58,27 @@ export async function createPostMultipart(
   if (payload.content) fd.append("content", payload.content);
   (payload.images ?? []).forEach((f) => fd.append("images", f));
 
-  const data = await authedFetch(`/posts/clubs/${clubId}/posts`, {
+  const res = await fetch(`${BASE_URL}/posts/clubs/${clubId}/posts`, {
     method: "POST",
     body: fd,
+    credentials: "include",
   });
-  return data.post;
+
+  if (!res.ok) {
+    let message = `Create failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) message = data.message;
+    } catch (_) {}
+    throw new Error(message);
+  }
+
+  try {
+    const data = await res.json();
+    return data.post;
+  } catch {
+    return null;
+  }
 }
 
 export async function updatePost(
@@ -100,12 +116,27 @@ export async function updatePostMultipart(
     fd.append("existingIds", JSON.stringify(payload.existingIds));
   (payload.newFiles ?? []).forEach((f) => fd.append("newImages", f));
 
-  const data = await authedFetch(`/posts/${postId}`, {
+  const res = await fetch(`${BASE_URL}/posts/${postId}`, {
     method: "PATCH",
     body: fd,
-    requireJson: true,
+    credentials: "include",
   });
-  return data.post;
+
+  if (!res.ok) {
+    let message = `Update failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) message = data.message;
+    } catch (_) {}
+    throw new Error(message);
+  }
+
+  try {
+    const data = await res.json();
+    return data.post;
+  } catch {
+    return null;
+  }
 }
 
 

@@ -40,7 +40,6 @@ export default function ClubPostsPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  // สำหรับคุมปุ่ม Create ให้กดได้เฉพาะตอนฟอร์ม valid
   const [canSubmitCreate, setCanSubmitCreate] = useState(false);
 
   // 🔔 Global Alert state
@@ -49,10 +48,8 @@ export default function ClubPostsPage() {
     message: string;
   }>({ type: null, message: "" });
 
-  // กำลังยิง API อยู่ไหม (create / edit / delete)
   const [confirming, setConfirming] = useState(false);
 
-  // ใช้เก็บ callback submit ของฟอร์ม (ให้ dialog เรียกตอนกด Confirm)
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit" | "delete" | null>(null);
   const [selected, setSelected] = useState<StaffPostRow | null>(null);
@@ -126,7 +123,6 @@ export default function ClubPostsPage() {
 
   // ---------- handlers ----------
 
-  // CREATE (ใช้ createPostMultipart เดิม เพื่อให้ส่งเมลเหมือนเดิม แต่ optimisitc update)
   async function handleCreate(data: {
     title: string;
     content?: string;
@@ -142,7 +138,6 @@ export default function ClubPostsPage() {
         images: data.images,
       });
 
-      // optimistic: แทรกโพสต์ใหม่ไว้บนสุด
       setPosts((prev) => [created as StaffPostRow, ...prev]);
 
       showAlert("success", "✅ Post created successfully!");
@@ -206,7 +201,7 @@ export default function ClubPostsPage() {
     }
   }
 
-  // ตอนกดปุ่ม Confirm บน Dialog
+  //  Confirm บน Dialog
   const handleConfirm =
     mode === "delete"
       ? () => {
@@ -216,7 +211,6 @@ export default function ClubPostsPage() {
         if (!confirming) submitRef.current?.();
       };
 
-  // ✅ เงื่อนไข disabled ของปุ่ม Confirm
   const isConfirmDisabled =
     confirming || (mode === "create" && !canSubmitCreate);
 
@@ -306,7 +300,7 @@ export default function ClubPostsPage() {
         confirmTone={mode === "delete" ? "danger" : "default"}
         onClose={confirming ? () => {} : closeDialog}
         onConfirm={handleConfirm}
-        confirmDisabled={isConfirmDisabled} // ✅ ตรงนี้สำคัญ
+        confirmDisabled={isConfirmDisabled} 
       >
         {mode === "create" && (
           <PostCreateForm

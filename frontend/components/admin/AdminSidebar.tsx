@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants, Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -22,10 +22,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ConfirmDialog } from "../user/ConfirmDialog";
+import { logoutRequest } from "@/services/authService";
 
 export function AdminSidebar() {
   const role = useRole();
   const pathname = usePathname();
+  const router = useRouter();   
   const [email, setEmail] = useState<string | null>(null);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
@@ -41,11 +43,15 @@ export function AdminSidebar() {
     setEmail(cookieEmail);
   }, []);
 
-  function handleLogout() {
-    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    window.location.href = "/admin/login";
+  async function handleLogout() {
+    await logoutRequest();
+
+    const expired = "Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = `role=; path=/; expires=${expired}`;
+    document.cookie = `email=; path=/; expires=${expired}`;
+    document.cookie = `token=; path=/; expires=${expired}`;
+    document.cookie = `clubId=; path=/; expires=${expired}`;
+    router.replace("/admin/login");
   }
 
   const springTransition: Transition = {
