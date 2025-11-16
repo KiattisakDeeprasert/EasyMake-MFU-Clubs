@@ -67,6 +67,7 @@ export type ClubDetail = {
   is_following?: boolean;
    contact_channels?: ClubContactChannel[];
   members?: ClubMemberSnapshot[];
+  followerCount?: number;
 };
 
 export type FollowingClub = {

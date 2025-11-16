@@ -505,7 +505,7 @@ export default function ClubDetailPage() {
                           Members
                         </div>
                         <div className="font-medium">
-                          {club.members ? club.members.length : 0}
+                          {typeof club.followerCount === "number" ? club.followerCount : 0}
                         </div>
                       </div>
                     </div>
