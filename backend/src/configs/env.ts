@@ -11,4 +11,5 @@ export const env = {
   SUPERADMIN_SETUP_SECRET: process.env.SUPERADMIN_SETUP_SECRET || "",
   SMTP_USER: process.env.SMTP_USER || "example@gmail.com",
   SMTP_PASS: process.env.SMTP_PASS || "password",
+  RESEND_API_KEY: process.env.RESEND_API_KEY || "",
 };

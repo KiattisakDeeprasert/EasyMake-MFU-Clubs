@@ -1,28 +1,24 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { env } from "./env";
 
-export const mailer = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-  },
-});
+const resend = new Resend(env.RESEND_API_KEY);
 
-export function sendEmail(to: string, subject: string, html: string) {
-  mailer
-    .sendMail({
-      from: env.EMAIL_FROM,
+export async function sendEmail(to: string, subject: string, html: string) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: env.EMAIL_FROM, 
       to,
       subject,
       html,
-    })
-    .then(() => {
-      console.log("[MAIL] sent to", to, subject);
-    })
-    .catch((err) => {
-      console.error("[MAIL] failed:", err);
     });
+
+    if (error) {
+      console.error("[MAIL] failed:", error);
+      return;
+    }
+
+    console.log("[MAIL] sent:", data?.id, "to:", to);
+  } catch (err) {
+    console.error("[MAIL] exception:", err);
+  }
 }
