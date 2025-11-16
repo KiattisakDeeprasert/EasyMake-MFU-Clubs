@@ -28,12 +28,7 @@ import { FeedFilterToggle } from "@/components/user/activities/FeedFilterToggle"
 
 type FilterMode = "all" | "following";
 
-const LOGIN_PATH = "/user/auth/login"; 
-
-function isLoggedIn() {
-  if (typeof document === "undefined") return false;
-  return document.cookie.split(";").some((c) => c.trim().startsWith("token="));
-}
+const LOGIN_PATH = "/user/auth/login";
 
 function redirectToLogin() {
   if (typeof window !== "undefined") {
@@ -71,15 +66,6 @@ export default function ActivitiesPage() {
       } catch (err) {
         console.error("load activities feed error", err);
         actFeed = [];
-      }
-
-      if (isLoggedIn()) {
-        try {
-          following = await getMyFollowingClubs();
-        } catch (err) {
-          console.error("load following clubs error", err);
-          following = [];
-        }
       }
 
       setPosts(postFeed);
@@ -131,11 +117,6 @@ export default function ActivitiesPage() {
 
   // like post
   const handleToggleLike = async (postId: string) => {
-    if (!isLoggedIn()) {
-      redirectToLogin();
-      return;
-    }
-
     try {
       const result = await togglePostLike(postId);
       setPosts((prev) =>
@@ -147,6 +128,7 @@ export default function ActivitiesPage() {
       );
     } catch (err: any) {
       const msg = String(err?.message || "");
+      // ถ้า backend ตอบ 401/Unauthorized ค่อยส่งไปหน้า login
       if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
         redirectToLogin();
         return;

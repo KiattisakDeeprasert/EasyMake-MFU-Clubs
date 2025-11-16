@@ -10,7 +10,7 @@ import type { PublicPostRow } from "@/services/postsService";
 type Props = {
   post: PublicPostRow;
   onToggleLike: (id: string) => void;
-  index?: number; // เผื่อใช้ทำ animation delay
+  index?: number; 
 };
 
 export function PostFeedCard({ post, onToggleLike }: Props) {
