@@ -41,6 +41,7 @@ export type ClubPublic = {
   status: "active" | "suspended";
   cover_image_url?: string;
   members?: ClubMemberSnapshot[];
+  followerCount?: number;
 };
 
 export type ClubContactChannel = {

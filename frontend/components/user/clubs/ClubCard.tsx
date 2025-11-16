@@ -18,13 +18,12 @@ export default function ClubCard({
     tagline?: string;
     description?: string;
     cover_image_url?: string;
-    members?: { full_name: string }[];
+    followerCount?: number;
   };
   viewMode: "grid" | "list";
   index: number;
 }) {
-  const memberCount = club.members?.length ?? 0;
-
+  const followerCount = club.followerCount ?? 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -74,9 +73,9 @@ export default function ClubCard({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="w-4 h-4 text-primary" />
                 <span>
-                  {memberCount > 0
-                    ? `${memberCount} members`
-                    : "No member info"}
+                  {followerCount > 0
+                    ? `${followerCount} followers`
+                    : "No followers yet"}
                 </span>
               </div>
 
