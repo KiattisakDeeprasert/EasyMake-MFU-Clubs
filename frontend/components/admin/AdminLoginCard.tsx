@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { ErrorAlert } from "./ErrorAlert";
 import { loginRequest } from "@/services/authService";
-import { useAuth } from "@/lib/auth";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -17,20 +16,23 @@ function getCookie(name: string): string | null {
 
 export function AdminLoginCard() {
   const router = useRouter();
-  const { role, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const isAdminRole =
-    role === "super-admin" || role === "club-leader" || role === "co-leader";
   useEffect(() => {
-    if (!loading && isAdminRole) {
-      router.replace("/admin");
+    const cookieRole = getCookie("role");
+    if (
+      cookieRole === "super-admin" ||
+      cookieRole === "club-leader" ||
+      cookieRole === "co-leader"
+    ) {
+      router.replace("/admin/");
     }
-  }, [loading, isAdminRole, router]);
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,12 +52,20 @@ export function AdminLoginCard() {
         return;
       }
 
-      router.replace("/admin");
+      // ✅ Store clubId in localStorage for quick frontend access
+      if (result.user.clubId) {
+        localStorage.setItem("clubId", result.user.clubId);
+      } else {
+        localStorage.removeItem("clubId");
+      }
+
+      router.push("/admin/");
     } catch (err: any) {
       setError(err.message || "Login failed");
       setSubmitting(false);
     }
   }
+
   const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.9, y: 20 },
     show: {
@@ -99,7 +109,6 @@ export function AdminLoginCard() {
       initial="hidden"
       animate="show"
     >
-      {/* HEADER */}
       <motion.div className="space-y-2 text-center" variants={itemVariants}>
         <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wide font-medium">
           EasyMake • MFU Clubs
@@ -139,6 +148,7 @@ export function AdminLoginCard() {
               if (error) setError("");
             }}
             required
+            autoComplete="email"
             disabled={submitting}
           />
         </div>
@@ -163,6 +173,7 @@ export function AdminLoginCard() {
               if (error) setError("");
             }}
             required
+            autoComplete="current-password"
             disabled={submitting}
           />
         </div>
@@ -179,9 +190,19 @@ export function AdminLoginCard() {
             hover:bg-gray-800
             active:scale-[0.99]
           "
+          whileHover={{ y: -1 }}
+          whileTap={{ scale: 0.98 }}
         >
           {submitting ? "Signing in..." : "Sign in"}
         </motion.button>
+
+        <motion.p
+          className="text-[11px] text-center text-gray-400 leading-relaxed"
+          variants={itemVariants}
+        >
+          By signing in you agree that you are authorized MFU staff/club
+          personnel. Unauthorized access is prohibited.
+        </motion.p>
       </motion.form>
     </motion.div>
   );
