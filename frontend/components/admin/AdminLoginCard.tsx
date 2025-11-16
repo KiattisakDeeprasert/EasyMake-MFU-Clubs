@@ -1,103 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { ErrorAlert } from "./ErrorAlert";
-import { loginRequest } from "@/services/authService";
+import { Eye, EyeOff } from "lucide-react";
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(name + "="));
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
+type AdminLoginCardProps = {
+  email: string;
+  password: string;
+  submitting: boolean;
+  error: string;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+};
 
-export function AdminLoginCard() {
-  const router = useRouter();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const cookieRole = getCookie("role");
-    if (
-      cookieRole === "super-admin" ||
-      cookieRole === "club-leader" ||
-      cookieRole === "co-leader"
-    ) {
-      router.replace("/admin/");
-    }
-  }, [router]);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setError("");
-
-    try {
-      const result = await loginRequest(email, password);
-
-      if (
-        result.user.role !== "super-admin" &&
-        result.user.role !== "club-leader" &&
-        result.user.role !== "co-leader"
-      ) {
-        setError("You are not allowed to access admin dashboard.");
-        setSubmitting(false);
-        return;
-      }
-
-      const maxAge = 7 * 24 * 60 * 60; // 7 วัน
-
-      document.cookie = `role=${result.user.role}; path=/; max-age=${maxAge}`;
-      document.cookie = `email=${encodeURIComponent(
-        result.user.email
-      )}; path=/; max-age=${maxAge}`;
-
-      if (result.user.clubId) {
-        document.cookie = `clubId=${result.user.clubId}; path=/; max-age=${maxAge}`;
-      } else {
-        document.cookie = `clubId=; path=/; max-age=0`;
-      }
-
-      router.push("/admin/");
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-      setSubmitting(false);
-    }
-  }
-
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.9, y: 20 },
-    show: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: [0.16, 1, 0.3, 1],
-        when: "beforeChildren",
-        staggerChildren: 0.08,
-      },
+const cardVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.16, 1, 0.3, 1],
+      when: "beforeChildren",
+      staggerChildren: 0.08,
     },
-  };
+  },
+};
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 16 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.35,
-        ease: [0.16, 1, 0.3, 1],
-      },
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1],
     },
-  };
+  },
+};
+
+export function AdminLoginCard({
+  email,
+  password,
+  submitting,
+  error,
+  onEmailChange,
+  onPasswordChange,
+  onSubmit,
+}: AdminLoginCardProps) {
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <motion.div
@@ -134,6 +88,7 @@ export function AdminLoginCard() {
         className="space-y-5"
         variants={itemVariants}
       >
+        {/* Email */}
         <div className="space-y-2">
           <label className="block text-xs font-medium text-gray-600">
             Email
@@ -149,41 +104,54 @@ export function AdminLoginCard() {
             type="email"
             placeholder="you@mfu.ac.th"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (error) setError("");
-            }}
+            onChange={(e) => onEmailChange(e.target.value)}
             required
             autoComplete="email"
             disabled={submitting}
           />
         </div>
 
-        <div className="space-y-2">
+        {/* Password */}
+        <div className="space-y-2 relative">
           <label className="block text-xs font-medium text-gray-600">
             Password
           </label>
-          <input
-            className="
-              w-full rounded-lg border border-gray-300 
-              px-3 py-2.5 text-sm text-gray-900 
-              placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900
-              bg-white
-            "
-            type="password"
-            placeholder="••••••••••"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (error) setError("");
-            }}
-            required
-            autoComplete="current-password"
-            disabled={submitting}
-          />
+
+          <div className="relative">
+            <input
+              className="
+                w-full rounded-lg border border-gray-300 
+                px-3 py-2.5 pr-10 text-sm text-gray-900 
+                placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900
+                bg-white
+              "
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••••"
+              value={password}
+              onChange={(e) => onPasswordChange(e.target.value)}
+              required
+              autoComplete="current-password"
+              disabled={submitting}
+            />
+
+            {/* 👁 ไอคอนโชว์/ซ่อน */}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
 
+        {/* Button */}
         <motion.button
           type="submit"
           disabled={submitting}
