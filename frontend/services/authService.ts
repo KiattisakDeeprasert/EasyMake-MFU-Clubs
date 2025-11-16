@@ -56,6 +56,7 @@ export async function getMe() {
   try {
     const res = await fetch(`${BASE_URL}/me`, {
       credentials: "include",
+      cache: "no-store",
     });
 
     if (!res.ok) {
