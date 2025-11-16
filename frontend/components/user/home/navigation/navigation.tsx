@@ -51,10 +51,28 @@ export function Navigation() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="relative flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="shrink-0 z-10">
-            <Link href="/user" className="flex items-center gap-2">
+        <div className="relative flex items-center h-16">
+          {/* LEFT: burger (mobile) + logo (desktop) */}
+          <div className="flex items-center gap-2 z-20">
+            {/* burger mobile */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </Button>
+
+            {/* logo desktop */}
+            <Link
+              href="/user"
+              className="hidden md:flex items-center gap-2"
+            >
               <div className="relative w-20 h-20">
                 <Image
                   src="/brand-icon.png"
@@ -67,80 +85,81 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 -translate-x-1/2 h-16">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="relative flex items-center text-sm font-medium transition-colors hover:text-primary"
-                >
-                  <span
-                    className={isActive ? "text-primary" : "text-foreground"}
+          {/* CENTER: logo mobile + desktop nav */}
+          <div className="absolute inset-x-0 flex justify-center items-center h-16 pointer-events-none">
+            {/* logo mobile */}
+            <Link
+              href="/user"
+              className="md:hidden flex items-center gap-2 pointer-events-auto"
+            >
+              <div className="relative w-16 h-16">
+                <Image
+                  src="/brand-icon.png"
+                  alt="EasyMake Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </Link>
+
+            {/* desktop nav  */}
+            <div className="hidden md:flex items-center justify-center gap-8 h-16 pointer-events-auto">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="relative flex items-center text-sm font-medium transition-colors hover:text-primary"
                   >
-                    {item.label}
-                  </span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className="absolute -bottom-px left-0 right-0 h-0.5 bg-primary"
-                      transition={{
-                        type: "spring",
-                        stiffness: 380,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+                    <span
+                      className={isActive ? "text-primary" : "text-foreground"}
+                    >
+                      {item.label}
+                    </span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="navbar-indicator"
+                        className="absolute -bottom-px left-0 right-0 h-0.5 bg-primary"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2 shrink-0 z-10">
-            {/* ตอนกำลังเช็ค /me อยู่จะยังไม่แสดงอะไร เพื่อลดกระพริบ */}
+          {/* RIGHT: login / user menu  */}
+          <div className="ml-auto flex items-center gap-2 z-20">
             {!checking && (
               <>
                 {isLoggedIn ? (
                   <>
-                    <div className="hidden md:flex">
-                      <NotificationBellContainer />
-                    </div>
-                    <div className="hidden md:flex">
-                      <UserMenu />
-                    </div>
+                    {/*  notification + user menu  desktop และ mobile */}
+                    <NotificationBellContainer />
+                    <UserMenu />
                   </>
                 ) : (
                   <Button
                     asChild
                     variant="default"
                     size="sm"
-                    className="hidden md:flex"
                   >
                     <Link href="/user/auth/login">Login</Link>
                   </Button>
                 )}
               </>
             )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu (slide down) */}
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -172,11 +191,21 @@ export function Navigation() {
                   <>
                     {isLoggedIn ? (
                       <>
-                        <Button variant="ghost" size="sm" className="flex-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
                           <Bell className="w-4 h-4 mr-2" />
                           Notifications
                         </Button>
-                        <Button variant="ghost" size="sm" className="flex-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
                           <User className="w-4 h-4 mr-2" />
                           Profile
                         </Button>
@@ -187,6 +216,7 @@ export function Navigation() {
                         variant="default"
                         size="sm"
                         className="flex-1"
+                        onClick={() => setMobileMenuOpen(false)}
                       >
                         <Link href="/user/auth/login">Login</Link>
                       </Button>
