@@ -53,17 +53,6 @@ export async function loginWithGoogleIdToken(idToken: string) {
 }
 
 export async function getMe() {
-  if (typeof document !== "undefined") {
-    const hasToken = document.cookie
-      .split(";")
-      .map((c) => c.trim())
-      .some((c) => c.startsWith("token="));
-
-    if (!hasToken) {
-      return null;
-    }
-  }
-
   try {
     const res = await fetch(`${BASE_URL}/me`, {
       credentials: "include",

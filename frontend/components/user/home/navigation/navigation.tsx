@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import { NotificationBellContainer } from "../../notifications/NotificationBellContainer";
-import { getMe } from "@/services/authService";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -18,29 +17,16 @@ export function Navigation() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+    if (typeof document === "undefined") return;
 
-    (async () => {
-      try {
-        const me = await getMe(); 
-        if (!cancelled) {
-          setIsLoggedIn(!!me);
-        }
-      } catch {
-        if (!cancelled) {
-          setIsLoggedIn(false);
-        }
-      } finally {
-        if (!cancelled) {
-          setChecking(false);
-        }
-      }
-    })();
+    const hasToken = document.cookie
+      .split(";")
+      .map((c) => c.trim())
+      .some((c) => c.startsWith("token="));
 
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]); 
+    setIsLoggedIn(hasToken);
+    setChecking(false);
+  }, [pathname]);
 
   const navItems = [
     { href: "/user", label: "Home" },
