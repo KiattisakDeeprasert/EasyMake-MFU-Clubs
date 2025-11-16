@@ -87,6 +87,10 @@ async function getClubPublic(clubId: string) {
   const club = await ClubModel.findById(clubId).lean();
   if (!club) throw new HttpError(404, "Club not found");
 
+  const followerCount = await ClubFollowerModel.countDocuments({
+    club_id: clubId,
+  });
+
   return {
     _id: club._id,
     name: club.name,
@@ -96,6 +100,7 @@ async function getClubPublic(clubId: string) {
     status: club.status,
     contact_channels: club.contact_channels || [],
     members: club.founding_members || [],
+    followerCount,
   };
 }
 
