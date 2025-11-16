@@ -19,11 +19,14 @@ export default function ClubCard({
     description?: string;
     cover_image_url?: string;
     followerCount?: number;
+    members?: { full_name: string }[];
   };
   viewMode: "grid" | "list";
   index: number;
 }) {
-  const followerCount = club.followerCount ?? 0;
+  const followerCount =
+    club.followerCount ??
+    (Array.isArray(club.members) ? club.members.length : 0);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
