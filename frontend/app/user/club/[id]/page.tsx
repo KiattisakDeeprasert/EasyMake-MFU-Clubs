@@ -30,6 +30,7 @@ import { ErrorDialog } from "@/components/user/ErrorDialog";
 import ClubEventsList from "@/components/user/clubs/ClubEventList";
 import { ConfirmDialog } from "@/components/user/ConfirmDialog";
 import { CornerToast } from "@/components/user/CornerToast";
+import { getMe } from "@/services/authService";
 
 const LOGIN_PATH = "/user/auth/login";
 
@@ -64,6 +65,9 @@ export default function ClubDetailPage() {
     activityId: string;
     currentlyRegistered: boolean;
   }>(null);
+
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -127,10 +131,101 @@ export default function ClubDetailPage() {
       }
     })();
   }, [clubId]);
+  useEffect(() => {
+    let cancelled = false;
 
-  // ======= handler: follow / unfollow =======
+    (async () => {
+      try {
+        const me = await getMe();
+        if (!cancelled) {
+          setLoggedIn(!!me);
+        }
+      } catch {
+        if (!cancelled) setLoggedIn(false);
+      } finally {
+        if (!cancelled) setAuthChecked(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const [cRes, aRes] = await Promise.all([
+          getClubPublic(clubId),
+          getClubPublicActivities(clubId),
+        ]);
+
+        const rawActivities: any[] = aRes.activities || [];
+
+        let isFollowing = false;
+        const myRegIds = new Set<string>();
+        const lockedIds = new Set<string>();
+
+        if (loggedIn) {
+          try {
+            const [fs, regsRes] = await Promise.all([
+              getClubFollowStatus(clubId),
+              listMyRegistrations(),
+            ]);
+
+            isFollowing = fs.isFollowing;
+
+            const regs = regsRes ?? [];
+            regs.forEach((r) => {
+              const actId = String(r.activity_id);
+              if (r.status !== "cancelled") {
+                myRegIds.add(actId);
+              }
+              if (r.status === "cancelled") {
+                lockedIds.add(actId);
+              }
+            });
+          } catch (err) {
+            console.error(
+              "[ClubDetailPage] optional follow/registrations fetch failed",
+              err
+            );
+          }
+        }
+
+        const enrichedActs: PublicActivity[] = rawActivities.map((act) => ({
+          ...act,
+          is_registered: myRegIds.has(String(act._id)),
+          registration_locked_for_me: lockedIds.has(String(act._id)),
+        }));
+
+        if (!cancelled) {
+          setClub(cRes.club);
+          setActivities(enrichedActs);
+          setFollowing(isFollowing);
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          setErrMsg(e?.message || "Failed to load club");
+          setErrOpen(true);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clubId, loggedIn]); 
+
   const handleToggleFollow = async () => {
-    if (!isLoggedIn()) {
+    if (!authChecked) return;
+
+    if (!loggedIn) {
       redirectToLogin();
       return;
     }
@@ -173,7 +268,9 @@ export default function ClubDetailPage() {
     activityId: string,
     currentlyRegistered: boolean
   ) => {
-    if (!isLoggedIn()) {
+    if (!authChecked) return;
+
+    if (!loggedIn) {
       redirectToLogin();
       return;
     }
