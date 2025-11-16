@@ -185,45 +185,6 @@ export function Navigation() {
                   </Link>
                 );
               })}
-
-              <div className="flex gap-2 pt-2 border-t border-border">
-                {!checking && (
-                  <>
-                    {isLoggedIn ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Bell className="w-4 h-4 mr-2" />
-                          Notifications
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          Profile
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        asChild
-                        variant="default"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Link href="/user/auth/login">Login</Link>
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
             </div>
           </motion.div>
         )}
