@@ -232,7 +232,7 @@ async function activateClub(superAdminId: string, clubId: string) {
   await club.save();
 
   await AuditLogService.log(superAdminId, "ACTIVATE_CLUB", "club", clubId, {});
-  await NotificationService.broadcastToFollowers(clubId, {
+  NotificationService.broadcastToFollowers(clubId, {
     type: "club_activated",
     title: `Club ${club.name} has been re-activated`,
     body: "This club has regained access.",
@@ -250,7 +250,7 @@ async function suspendClub(superAdminId: string, clubId: string, reason: string)
   await club.save();
 
   await AuditLogService.log(superAdminId, "SUSPEND_CLUB", "club", clubId, { reason });
-  await NotificationService.broadcastToFollowers(clubId, {
+  NotificationService.broadcastToFollowers(clubId, {
     type: "club_suspended",
     title: `Club ${club.name} has been suspended`,
     body: reason,
@@ -268,7 +268,7 @@ async function deleteClub(superAdminId: string, clubId: string) {
   await ClubFollowerModel.deleteMany({ club_id: clubId });
   await UserModel.deleteMany({ is_founder_for_club_id: clubId });
 
-  await NotificationService.broadcastToFollowers(clubId, {
+  NotificationService.broadcastToFollowers(clubId, {
     type: "club_deleted",
     title: `Club ${club.name} has been deleted`,
     body: "This club has been permanently removed by the administration.",

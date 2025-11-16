@@ -166,7 +166,7 @@ async function createActivity(
     images: imageUrls,
     status: "published",
   });
-  await NotificationService.broadcastToFollowers(String(clubId), {
+  NotificationService.broadcastToFollowers(String(clubId), {
     type: "activity_update",
     title: `New activity: ${data.title}`,
     body:
@@ -222,7 +222,7 @@ async function updateStatus(
   activity.status = newStatus;
   await activity.save();
   if (newStatus === "cancelled") {
-    await NotificationService.broadcastToFollowers(String(club._id), {
+    NotificationService.broadcastToFollowers(String(club._id), {
       type: "activity_update",
       title: `Activity cancelled: ${activity.title}`,
       body: `An activity from ${club.name} was cancelled.`,

@@ -11,16 +11,18 @@ export const mailer = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail(to: string, subject: string, html: string) {
-  try {
-    await mailer.sendMail({
+export function sendEmail(to: string, subject: string, html: string) {
+  mailer
+    .sendMail({
       from: env.EMAIL_FROM,
       to,
       subject,
       html,
+    })
+    .then(() => {
+      console.log("[MAIL] sent to", to, subject);
+    })
+    .catch((err) => {
+      console.error("[MAIL] failed:", err);
     });
-    console.log("[MAIL] sent to", to, subject);
-  } catch (err) {
-    console.error("[MAIL] failed:", err);
-  }
 }
