@@ -6,6 +6,7 @@ import { TableCard } from "@/components/admin/TableCard";
 import { ClubActionDialog } from "@/components/admin/leaders/ClubActionDialog";
 import { type ClubApiRow } from "@/services/clubsService";
 import { MemberInput } from "./ClubEditFormSection";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 const rowVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
@@ -54,7 +55,7 @@ export function ClubsTable({
 
     const seedMembers: MemberInput[] = (club as any).members || [
       {
-        name: leaderFullName,
+        full_name: leaderFullName,
         email: leaderEmail,
         citizen_id: leaderCitizenId,
       },
@@ -97,105 +98,18 @@ export function ClubsTable({
     setEditError("");
   }
 
-  function IconView() {
+  function IconMore() {
     return (
       <svg
-        className="w-4 h-4 text-blue-600 hover:text-blue-700 transition-colors"
+        className="w-5 h-5 text-gray-500 hover:text-gray-800 transition-colors"
         fill="none"
+        viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.8}
-        viewBox="0 0 24 24"
       >
-        <path
-          d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  function IconEdit() {
-    return (
-      <svg
-        className="w-4 h-4 text-blue-600 hover:text-blue-700 transition-colors"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M16.862 3.487a2.1 2.1 0 0 1 2.97 2.97L7.5 18.79l-4 1 1-4 12.362-12.303Z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path d="M14.5 5.5l4 4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  function IconSuspend() {
-    return (
-      <svg
-        className="w-4 h-4 text-amber-600 hover:text-amber-700 transition-colors"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M15 9l-6 6M9 9l6 6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-  function IconActivate() {
-    return (
-      <svg
-        className="w-4 h-4 text-green-600 hover:text-green-700 transition-colors"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        viewBox="0 0 24 24"
-      >
-        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-        <circle
-          cx="12"
-          cy="12"
-          r="9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  function IconDelete() {
-    return (
-      <svg
-        className="w-4 h-4 text-red-600 hover:text-red-700 transition-colors"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <circle cx="12" cy="5" r="1.4" />
+        <circle cx="12" cy="12" r="1.4" />
+        <circle cx="12" cy="19" r="1.4" />
       </svg>
     );
   }
@@ -222,7 +136,6 @@ export function ClubsTable({
                 <th className="px-4 py-2 text-right">Action</th>
               </tr>
             </thead>
-
             <tbody>
               {clubs.length === 0 ? (
                 <tr>
@@ -234,82 +147,124 @@ export function ClubsTable({
                   </td>
                 </tr>
               ) : (
-                clubs.map((club) => (
-                  <motion.tr
-                    key={club._id}
-                    className="border-t border-gray-200 bg-white align-top"
-                    variants={rowVariants}
-                    initial="hidden"
-                    animate="show"
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {club.name}
-                      {club.tagline && (
-                        <div className="text-[11px] text-gray-500 font-normal">
-                          {club.tagline}
-                        </div>
-                      )}
-                    </td>
+                clubs.map((club) => {
+                  const clubId = String(club._id);
 
-                    <td className="px-4 py-3">
-                      {club.status === "active" ? (
-                        <span className="inline-flex rounded-md bg-green-100 text-green-800 text-[11px] font-medium px-2 py-1">
-                          active
-                        </span>
-                      ) : (
-                        <span className="inline-flex rounded-md bg-yellow-100 text-yellow-800 text-[11px] font-medium px-2 py-1">
-                          suspended
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          className="p-1"
-                          title="View"
-                          onClick={() => openDialog("view", club)}
-                        >
-                          <IconView />
-                        </button>
-
-                        <button
-                          className="p-1"
-                          title="Edit"
-                          onClick={() => openDialog("edit", club)}
-                        >
-                          <IconEdit />
-                        </button>
-
-                        {club.status === "active" ? (
-                          <button
-                            className="p-1"
-                            title="Suspend"
-                            onClick={() => openDialog("suspend", club)}
-                          >
-                            <IconSuspend />
-                          </button>
-                        ) : (
-                          <button
-                            className="p-1"
-                            title="Activate"
-                            onClick={() => openDialog("activate", club as any)}
-                          >
-                            <IconActivate />
-                          </button>
+                  return (
+                    <motion.tr
+                      key={clubId}
+                      className="border-t border-gray-200 bg-white align-top"
+                      variants={rowVariants}
+                      initial="hidden"
+                      animate="show"
+                    >
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        {club.name}
+                        {club.tagline && (
+                          <div className="text-[11px] text-gray-500 font-normal">
+                            {club.tagline}
+                          </div>
                         )}
+                      </td>
 
-                        <button
-                          className="p-1"
-                          title="Delete"
-                          onClick={() => openDialog("delete", club)}
-                        >
-                          <IconDelete />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))
+                      <td className="px-4 py-3">
+                        {club.status === "active" ? (
+                          <span className="inline-flex rounded-md bg-green-100 text-green-800 text-[11px] font-medium px-2 py-1">
+                            active
+                          </span>
+                        ) : (
+                          <span className="inline-flex rounded-md bg-yellow-100 text-yellow-800 text-[11px] font-medium px-2 py-1">
+                            suspended
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger asChild>
+                            <button
+                              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                              aria-label="Open club actions"
+                            >
+                              <IconMore />
+                            </button>
+                          </DropdownMenu.Trigger>
+
+                          <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                              side="bottom"
+                              align="end"
+                              sideOffset={4}
+                              asChild
+                            >
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.96, y: 4 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{
+                                  duration: 0.15,
+                                  ease: [0.16, 1, 0.3, 1],
+                                }}
+                                className="z-50 w-48 rounded-lg bg-white border border-gray-200 shadow-[0_12px_40px_rgba(15,23,42,0.12)] py-1"
+                              >
+                                <DropdownMenu.Item
+                                  className="w-full px-3 py-2 cursor-pointer text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                  onSelect={() => {
+                                    openDialog("view", club);
+                                  }}
+                                >
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                  View details
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Item
+                                  className="w-full px-3 py-2 cursor-pointer text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                  onSelect={() => {
+                                    openDialog("edit", club);
+                                  }}
+                                >
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                  Edit club & leader
+                                </DropdownMenu.Item>
+
+                                {club.status === "active" ? (
+                                  <DropdownMenu.Item
+                                    className="w-full px-3 py-2 cursor-pointer text-xs text-amber-700 hover:bg-amber-50 flex items-center gap-2"
+                                    onSelect={() => {
+                                      openDialog("suspend", club);
+                                    }}
+                                  >
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                    Suspend club
+                                  </DropdownMenu.Item>
+                                ) : (
+                                  <DropdownMenu.Item
+                                    className="w-full px-3 py-2 cursor-pointer text-xs text-green-700 hover:bg-green-50 flex items-center gap-2"
+                                    onSelect={() => {
+                                      openDialog("activate", club);
+                                    }}
+                                  >
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+                                    Activate club
+                                  </DropdownMenu.Item>
+                                )}
+                                <div className="h-px bg-gray-100 my-1" />
+                                <DropdownMenu.Item
+                                  className="w-full px-3 py-2 cursor-pointer text-xs text-red-700 hover:bg-red-50 flex items-center gap-2"
+                                  onSelect={() => {
+                                    openDialog("delete", club);
+                                  }}
+                                >
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+                                  Delete club
+                                </DropdownMenu.Item>
+                              </motion.div>
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Portal>
+                        </DropdownMenu.Root>
+                      </td>
+                    </motion.tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -13,7 +13,6 @@ type ActionDialogProps = {
   onConfirm?: () => void;
   children?: React.ReactNode;
 
-  // ✅ เพิ่มตัวนี้
   confirmDisabled?: boolean;
 };
 
@@ -27,7 +26,7 @@ export function ActionDialog({
   onClose,
   onConfirm,
   children,
-  confirmDisabled = false, // ✅ default = false
+  confirmDisabled = false, 
 }: ActionDialogProps) {
   const isViewOnly = mode === "view";
 

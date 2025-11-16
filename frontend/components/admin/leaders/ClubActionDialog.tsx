@@ -107,59 +107,76 @@ export function ClubActionDialog({
       return;
     }
 
-    try {
-      // suspend
-      if (mode === "suspend") {
-        await apiSuspendClub(selectedClub._id);
+    if (mode === "view") {
+      onClose();
+      return;
+    }
 
-        const next = clubs.map((c) =>
-          c._id === selectedClub._id
-            ? { ...c, status: "suspended" as const }
-            : c
-        );
-        onListChange(next);
-        onActionSuccess?.(`Club "${selectedClub.name}" suspended.`);
-        onClose();
-        return;
-      }
+    // ---------- OPTIMISTIC ACTIONS: suspend / activate / delete ----------
+    if (mode === "suspend" || mode === "activate" || mode === "delete") {
+      const prevClubs = clubs;
 
-      // activate
-      if (mode === "activate") {
-        await apiActivateClub(selectedClub._id);
+      try {
+        let next: ClubApiRow[] = prevClubs;
 
-        const next = clubs.map((c) =>
-          c._id === selectedClub._id
-            ? { ...c, status: "active" as const }
-            : c
-        );
-        onListChange(next);
-        onActionSuccess?.(`Club "${selectedClub.name}" activated.`);
-        onClose();
-        return;
-      }
+        if (mode === "suspend") {
+          next = prevClubs.map((c) =>
+            c._id === selectedClub._id
+              ? { ...c, status: "suspended" as const }
+              : c
+          );
+          onListChange(next);
+          onActionSuccess?.(`Club "${selectedClub.name}" suspended.`);
+          onClose();
 
-      // delete
-      if (mode === "delete") {
-        await apiDeleteClub(selectedClub._id);
-        const next = clubs.filter((c) => c._id !== selectedClub._id);
-        onListChange(next);
-        onActionSuccess?.(`Club "${selectedClub.name}" deleted.`);
-        onClose();
-        return;
-      }
+          // fire API background
+          await apiSuspendClub(selectedClub._id);
+        } else if (mode === "activate") {
+          next = prevClubs.map((c) =>
+            c._id === selectedClub._id
+              ? { ...c, status: "active" as const }
+              : c
+          );
+          onListChange(next);
+          onActionSuccess?.(`Club "${selectedClub.name}" activated.`);
+          onClose();
 
-      // edit
-      if (mode === "edit") {
-        const validationMsg = validateBeforeSubmit();
-        if (validationMsg) {
-          setEditError(validationMsg);
-          return;
+          await apiActivateClub(selectedClub._id);
+        } else if (mode === "delete") {
+          next = prevClubs.filter((c) => c._id !== selectedClub._id);
+          onListChange(next);
+          onActionSuccess?.(`Club "${selectedClub.name}" deleted.`);
+          onClose();
+
+          await apiDeleteClub(selectedClub._id);
         }
 
+        return;
+      } catch (err: any) {
+        console.error(err);
+        // rollback
+        onListChange(clubs);
+        onActionError?.(
+          err?.message || "Something went wrong performing action."
+        );
+        return;
+      }
+    }
+
+    // ---------- EDIT MODE ----------
+    if (mode === "edit") {
+      if (editSubmitting) return;
+
+      const validationMsg = validateBeforeSubmit();
+      if (validationMsg) {
+        setEditError(validationMsg);
+        return;
+      }
+
+      try {
         setEditSubmitting(true);
         setEditError("");
 
-        // call backend PATCH /clubs/:clubId/update-with-leader
         await apiUpdateClubWithLeader(selectedClub._id, {
           clubName: editClubName,
           leaderName: editLeaderName,
@@ -191,28 +208,28 @@ export function ClubActionDialog({
         onListChange(next);
 
         onActionSuccess?.(`Club "${editClubName}" updated.`);
-
         setEditSubmitting(false);
         onClose();
-        return;
+      } catch (err: any) {
+        console.error(err);
+        onActionError?.(
+          err?.message || "Something went wrong performing action."
+        );
+        setEditSubmitting(false);
       }
-
-      onClose();
-    } catch (err: any) {
-      console.error(err);
-      onActionError?.(
-        err?.message || "Something went wrong performing action."
-      );
-      setEditSubmitting(false);
+      return;
     }
+
+    onClose();
   }, [
-    selectedClub,
     mode,
+    selectedClub,
     clubs,
     onListChange,
     onClose,
     onActionSuccess,
     onActionError,
+    editSubmitting,
     editClubName,
     editLeaderName,
     editLeaderEmail,

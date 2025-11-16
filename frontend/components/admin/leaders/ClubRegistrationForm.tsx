@@ -31,6 +31,22 @@ type Props = {
   onCreated: () => void;
 };
 
+function sanitizeCitizenId(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 13);
+}
+
+function hasDuplicateEmails(leaderEmail: string, members: MemberInput[]): boolean {
+  const allEmailsNormalized = [
+    leaderEmail,
+    ...members.map((m) => m.email),
+  ]
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  const unique = new Set(allEmailsNormalized);
+  return unique.size !== allEmailsNormalized.length;
+}
+
 export function ClubRegistrationForm({ onCreated }: Props) {
   // club / leader info state
   const [clubName, setClubName] = useState("");
@@ -53,10 +69,6 @@ export function ClubRegistrationForm({ onCreated }: Props) {
   const [successMsg, setSuccessMsg] = useState("");
 
   // ---------- VALIDATION ----------
-  // กฎ:
-  // - ช่อง club / leader ทุกช่องต้องไม่ว่าง
-  // - ต้องมีสมาชิก >=5
-  // - ทุกแถวสมาชิกต้องกรอกครบทุกช่อง
   const isFormValid = useMemo(() => {
     if (
       !clubName.trim() ||
@@ -67,17 +79,25 @@ export function ClubRegistrationForm({ onCreated }: Props) {
       return false;
     }
 
+    if (leaderCitizenId.trim().length !== 13) {
+      return false;
+    }
+
     if (members.length < 5) return false;
 
     for (const m of members) {
-      if (
-        !m.name.trim() ||
-        !m.email.trim() ||
-        !m.citizenId.trim()
-      ) {
+      if (!m.name.trim() || !m.email.trim() || !m.citizenId.trim()) {
+        return false;
+      }
+      if (m.citizenId.trim().length !== 13) {
         return false;
       }
     }
+
+    if (hasDuplicateEmails(leaderEmail, members)) {
+      return false;
+    }
+
     return true;
   }, [clubName, leaderName, leaderEmail, leaderCitizenId, members]);
 
@@ -107,13 +127,17 @@ export function ClubRegistrationForm({ onCreated }: Props) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // กันกดย้ำ
     if (submitting) return;
 
-    // กัน submit ตรงๆ ผ่าน enter โดยที่ invalid
+    // เช็ค email ซ้ำก่อน เพื่อให้ error ชัดเจน
+    if (hasDuplicateEmails(leaderEmail, members)) {
+      setErrorMsg("Emails must be unique. Leader and all members must use different emails.");
+      return;
+    }
+
     if (!isFormValid) {
       setErrorMsg(
-        "Please complete all required fields (club info, leader info, and at least 5 fully-filled members)."
+        "Please complete all required fields. Citizen ID must be 13 digits and all emails must be unique."
       );
       return;
     }
@@ -146,7 +170,6 @@ export function ClubRegistrationForm({ onCreated }: Props) {
         { name: "", email: "", citizenId: "" },
       ]);
 
-      // refresh ตารางใน parent
       onCreated();
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to register club.");
@@ -234,8 +257,12 @@ export function ClubRegistrationForm({ onCreated }: Props) {
               className="w-full rounded-md border border-gray-300 px-3 py-2"
               placeholder="13-digit"
               required
+              inputMode="numeric"
+              pattern="\d*"
               value={leaderCitizenId}
-              onChange={(e) => setLeaderCitizenId(e.target.value)}
+              onChange={(e) =>
+                setLeaderCitizenId(sanitizeCitizenId(e.target.value))
+              }
               disabled={submitting}
             />
             <p className="text-[10px] text-gray-500 mt-1">
@@ -254,7 +281,7 @@ export function ClubRegistrationForm({ onCreated }: Props) {
             </div>
             <p className="text-[11px] text-gray-500 leading-relaxed">
               Add at least 5 founding members. These members will be
-              used to validate the club.
+              used to validate the club. Emails must all be unique.
             </p>
           </div>
 
@@ -262,7 +289,7 @@ export function ClubRegistrationForm({ onCreated }: Props) {
             type="button"
             onClick={addMemberRow}
             disabled={submitting}
-            className="px-2.5 py-1.5 text-[12px] rounded-md bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-2.5 py-1.5 text[12px] rounded-md bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             + Add Member
           </button>
@@ -321,9 +348,11 @@ export function ClubRegistrationForm({ onCreated }: Props) {
                 <input
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   placeholder="13-digit"
+                  inputMode="numeric"
+                  pattern="\d*"
                   value={m.citizenId}
                   onChange={(e) =>
-                    updateMember(idx, "citizenId", e.target.value)
+                    updateMember(idx, "citizenId", sanitizeCitizenId(e.target.value))
                   }
                   disabled={submitting}
                 />

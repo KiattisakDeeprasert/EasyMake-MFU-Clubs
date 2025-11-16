@@ -153,7 +153,7 @@ export function AdminSidebar() {
               <NavItem
                 href="/admin/system/leaders"
                 icon={UserPlus}
-                label="Club Leaders (CRUD)"
+                label="Create Club Leaders"
                 isActive={pathname === "/admin/system/leaders"}
               />
               <NavItem
