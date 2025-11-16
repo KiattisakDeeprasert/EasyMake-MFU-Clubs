@@ -7,6 +7,7 @@ import { requireClubStaff } from "../middleware/clubRoleGuard";
 import multer from "multer";
 import { ActivityController } from "../controllers/ActivityController";
 import { ClubModel } from "../models/Club.model";
+import { ClubFollowerModel } from "../models/ClubFollower.model";
 
 const router = Router();
 
@@ -26,14 +27,27 @@ router.get("/public", async (_req, res, next) => {
       .sort({ created_at: -1 })
       .lean();
 
+    const clubIds = clubs.map((c: any) => c._id);
+
+    const followerAgg = await ClubFollowerModel.aggregate([
+      { $match: { club_id: { $in: clubIds } } },
+      { $group: { _id: "$club_id", total: { $sum: 1 } } },
+    ]);
+
+    const followerMap = new Map<string, number>();
+    followerAgg.forEach((row: any) => {
+      followerMap.set(String(row._id), row.total);
+    });
+
     const formatted = clubs.map((c: any) => ({
       _id: c._id,
       name: c.name,
       tagline: c.tagline || "",
       description: c.description || "",
       status: c.status,
-      members: c.founding_members || [],
       cover_image_url: c.cover_image_url || null,
+      followerCount: followerMap.get(String(c._id)) || 0,
+      members: c.founding_members || [],
     }));
 
     res.json({ clubs: formatted });
@@ -208,7 +222,5 @@ router.get(
   requireRole("user", "club-leader", "co-leader", "super-admin"),
   ClubController.getMyFollowingClubs
 );
-
-router.get("/clubs/public", ClubController.listPublicClubs);
 
 export default router;
