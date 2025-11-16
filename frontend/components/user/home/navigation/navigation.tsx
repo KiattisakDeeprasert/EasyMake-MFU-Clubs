@@ -22,7 +22,7 @@ function hasUserCookie() {
 export function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => hasUserCookie());
 
   useEffect(() => {
     setIsLoggedIn(hasUserCookie());
