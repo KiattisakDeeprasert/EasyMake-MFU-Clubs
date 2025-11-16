@@ -10,18 +10,22 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import { NotificationBellContainer } from "../../notifications/NotificationBellContainer";
 
+function hasUserCookie() {
+  if (typeof document === "undefined") return false;
+
+  return document.cookie.split(";").some((raw) => {
+    const [name] = raw.trim().split("=");
+    return name === "email" || name === "role" || name === "clubId";
+  });
+}
+
 export function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
-    const hasToken = document.cookie
-      .split(";")
-      .some((c) => c.trim().startsWith("token="));
-    setIsLoggedIn(hasToken);
+    setIsLoggedIn(hasUserCookie());
   }, [pathname]);
 
   const navItems = [
@@ -145,30 +149,26 @@ export function Navigation() {
               })}
 
               <div className="flex gap-2 pt-2 border-t border-border">
-                {!checking && (
+                {isLoggedIn ? (
                   <>
-                    {isLoggedIn ? (
-                      <>
-                        <Button variant="ghost" size="sm" className="flex-1">
-                          <Bell className="w-4 h-4 mr-2" />
-                          Notifications
-                        </Button>
-                        <Button variant="ghost" size="sm" className="flex-1">
-                          <User className="w-4 h-4 mr-2" />
-                          Profile
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        asChild
-                        variant="default"
-                        size="sm"
-                        className="flex-1"
-                      >
-                        <Link href="/user/auth/login">Login</Link>
-                      </Button>
-                    )}
+                    <Button variant="ghost" size="sm" className="flex-1">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Notifications
+                    </Button>
+                    <Button variant="ghost" size="sm" className="flex-1">
+                      <User className="w-4 h-4 mr-2" />
+                      Profile
+                    </Button>
                   </>
+                ) : (
+                  <Button
+                    asChild
+                    variant="default"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Link href="/user/auth/login">Login</Link>
+                  </Button>
                 )}
               </div>
             </div>
