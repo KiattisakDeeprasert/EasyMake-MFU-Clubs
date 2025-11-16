@@ -88,8 +88,22 @@ export async function getPublicClubs(): Promise<{ clubs: ClubPublic[] }> {
     const msg = await res.text().catch(() => "");
     throw new Error(msg || `Failed to load clubs (${res.status})`);
   }
-  return res.json() as Promise<{ clubs: ClubPublic[] }>;
+
+  const data = (await res.json()) as { clubs: any[] };
+
+  const clubs: ClubPublic[] = (data.clubs || []).map((c) => ({
+    ...c,
+    followerCount:
+      typeof c.followerCount === "number"
+        ? c.followerCount
+        : Array.isArray(c.members)
+        ? c.members.length
+        : 0,
+  }));
+
+  return { clubs };
 }
+
 
 export async function getClubPublic(clubId: string): Promise<{ club: ClubDetail }> {
   const res = await fetch(`${BASE_URL}/clubs/${clubId}`, { cache: "no-store" });
