@@ -10,22 +10,27 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import { NotificationBellContainer } from "../../notifications/NotificationBellContainer";
 
-function hasUserCookie() {
-  if (typeof document === "undefined") return false;
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
 
-  return document.cookie.split(";").some((raw) => {
-    const [name] = raw.trim().split("=");
-    return name === "email" || name === "role" || name === "clubId";
-  });
+  const match = document.cookie.match(
+    new RegExp("(^|;)\\s*" + name + "=([^;]+)")
+  );
+  return match ? decodeURIComponent(match[2]) : null;
 }
+
+function hasUserSession() {
+  return !!(getCookie("role") || getCookie("email") || getCookie("clubId"));
+}
+
 
 export function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => hasUserCookie());
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => hasUserSession());
 
   useEffect(() => {
-    setIsLoggedIn(hasUserCookie());
+    setIsLoggedIn(hasUserSession());
   }, [pathname]);
 
   const navItems = [
