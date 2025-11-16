@@ -11,6 +11,9 @@ router.post("/register", AuthController.registerNormal);
 // login with password
 router.post("/login", AuthController.login);
 
+// logout
+router.post("/logout", AuthController.logout);
+
 // login/register via google
 router.post("/oauth/google", AuthController.oauthGoogleCallback);
 

@@ -52,6 +52,17 @@ export async function loginWithGoogleIdToken(idToken: string) {
   return data;
 }
 
+export async function logoutRequest() {
+  try {
+    await fetch(`${BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (e) {
+    console.error("Logout failed", e);
+  }
+}
+
 export async function getMe() {
   try {
     const res = await fetch(`${BASE_URL}/me`, {

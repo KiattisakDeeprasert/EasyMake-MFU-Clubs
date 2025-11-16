@@ -70,6 +70,27 @@ export const AuthController = {
     }
   },
 
+  logout: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const isProd = process.env.NODE_ENV === "production";
+
+      const baseOptions = {
+        secure: isProd,
+        sameSite: isProd ? ("none" as const) : ("lax" as const),
+        path: "/",
+      };
+
+      res.clearCookie("token", { ...baseOptions, httpOnly: false });
+      res.clearCookie("role", { ...baseOptions, httpOnly: false });
+      res.clearCookie("email", { ...baseOptions, httpOnly: false });
+      res.clearCookie("clubId", { ...baseOptions, httpOnly: false });
+
+      return res.status(200).json({ message: "Logged out" });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   createSuperAdmin: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password, secret, full_name, phone } = req.body;

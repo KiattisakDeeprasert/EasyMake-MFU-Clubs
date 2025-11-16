@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/user/ConfirmDialog";
+import { logoutRequest } from "@/services/authService";
 
 export default function UserMenu() {
   const [open, setOpen] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false); 
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -23,25 +24,24 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  function handleConfirmLogout() {
+  async function handleConfirmLogout() {
+    await logoutRequest();
+
+    deleteCookie("role");
+    deleteCookie("email");
+    deleteCookie("clubId");
     deleteCookie("token");
+
     setConfirmOpen(false);
     setOpen(false);
     router.replace("/user/auth/login");
-  }
-
-  function handleCancelLogout() {
-    setConfirmOpen(false);
+    router.refresh?.();
   }
 
   return (
     <>
       <div className="relative" ref={ref}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setOpen((v) => !v)}
-        >
+        <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)}>
           <User className="w-5 h-5" />
         </Button>
 
@@ -85,7 +85,7 @@ export default function UserMenu() {
         title="Confirm logout"
         message="Are you sure you want to logout?"
         onConfirm={handleConfirmLogout}
-        onCancel={handleCancelLogout}
+        onCancel={handleConfirmLogout}
       />
     </>
   );
