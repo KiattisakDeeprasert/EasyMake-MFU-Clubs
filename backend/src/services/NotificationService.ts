@@ -21,6 +21,10 @@ function toAbsoluteLink(link?: string) {
   return `${env.PUBLIC_WEB_BASE}${link}`;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function sendToUser(userId: string, notif: NotifInput) {
   const doc = await NotificationModel.create({
     user_id: userId,
@@ -47,18 +51,22 @@ async function sendToUser(userId: string, notif: NotifInput) {
       notif.body,
       toAbsoluteLink(notif.link_url)
     );
-    sendEmail(user.email, `[EasyMake MFU] ${notif.title}`, html);
+     await sendEmail(user.email, `[EasyMake MFU] ${notif.title}`, html);
   }
 }
 
 async function broadcastToFollowers(clubId: string, notif: NotifInput) {
   const followers = await ClubFollowerModel.find({ club_id: clubId }).lean();
 
-  followers.forEach((f) => {
-    sendToUser(String(f.user_id), notif).catch((err) => {
+  for (const f of followers) {
+    try {
+      await sendToUser(String(f.user_id), notif);
+    } catch (err) {
       console.error("[NOTIFY] sendToUser failed:", err);
-    });
-  });
+    }
+
+    await sleep(1000);
+  }
 }
 
 export const NotificationService = {
