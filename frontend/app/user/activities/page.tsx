@@ -46,7 +46,7 @@ export default function ActivitiesPage() {
   const [followedClubIds, setFollowedClubIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       setLoading(true);
 
@@ -68,6 +68,20 @@ export default function ActivitiesPage() {
         actFeed = [];
       }
 
+      try {
+        following = await getMyFollowingClubs();
+      } catch (err: any) {
+        const msg = String(err?.message || "");
+        if (
+          msg.toLowerCase().includes("unauthorized") ||
+          msg.includes("401")
+        ) {
+          following = [];
+        } else {
+          console.error("load following clubs error", err);
+        }
+      }
+
       setPosts(postFeed);
       setActivities(actFeed);
       setFollowedClubIds(following.map((c) => String(c._id)));
@@ -75,6 +89,7 @@ export default function ActivitiesPage() {
       setLoading(false);
     })();
   }, []);
+
 
   useEffect(() => {
     setVisiblePostsCount(5);
@@ -128,7 +143,6 @@ export default function ActivitiesPage() {
       );
     } catch (err: any) {
       const msg = String(err?.message || "");
-      // ถ้า backend ตอบ 401/Unauthorized ค่อยส่งไปหน้า login
       if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
         redirectToLogin();
         return;

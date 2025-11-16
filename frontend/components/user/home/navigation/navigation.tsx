@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
 import { NotificationBellContainer } from "../../notifications/NotificationBellContainer";
-import { getMe } from "@/services/authService";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -18,28 +17,11 @@ export function Navigation() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const me = await getMe();
-        if (!cancelled) {
-          setIsLoggedIn(!!me);
-        }
-      } catch {
-        if (!cancelled) {
-          setIsLoggedIn(false);
-        }
-      } finally {
-        if (!cancelled) {
-          setChecking(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    if (typeof document === "undefined") return;
+    const hasToken = document.cookie
+      .split(";")
+      .some((c) => c.trim().startsWith("token="));
+    setIsLoggedIn(hasToken);
   }, [pathname]);
 
   const navItems = [
@@ -100,29 +82,24 @@ export function Navigation() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 shrink-0 z-10">
-            {/* ตอนกำลังเช็ค /me อยู่จะยังไม่แสดงอะไร เพื่อลดกระพริบ */}
-            {!checking && (
+            {isLoggedIn ? (
               <>
-                {isLoggedIn ? (
-                  <>
-                    <div className="hidden md:flex">
-                      <NotificationBellContainer />
-                    </div>
-                    <div className="hidden md:flex">
-                      <UserMenu />
-                    </div>
-                  </>
-                ) : (
-                  <Button
-                    asChild
-                    variant="default"
-                    size="sm"
-                    className="hidden md:flex"
-                  >
-                    <Link href="/user/auth/login">Login</Link>
-                  </Button>
-                )}
+                <div className="hidden md:flex">
+                  <NotificationBellContainer />
+                </div>
+                <div className="hidden md:flex">
+                  <UserMenu />
+                </div>
               </>
+            ) : (
+              <Button
+                asChild
+                variant="default"
+                size="sm"
+                className="hidden md:flex"
+              >
+                <Link href="/user/auth/login">Login</Link>
+              </Button>
             )}
 
             <Button
