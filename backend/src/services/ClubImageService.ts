@@ -1,9 +1,10 @@
+import { env } from "../configs/env";
 import { ClubModel } from "../models/Club.model";
 import { getGridFsBucket } from "../utils/gridfs";
 import { ObjectId } from "mongodb";
 
 const PUBLIC_API_ORIGIN =
-  process.env.PUBLIC_API_ORIGIN || "http://localhost:8081";
+  (env.PUBLIC_API_BASE || "http://localhost:8081").replace(/\/+$/, "");
 
 export const ClubImageService = {
   async updateCoverImage(opts: {
