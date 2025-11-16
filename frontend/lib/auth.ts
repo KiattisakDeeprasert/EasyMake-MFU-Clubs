@@ -1,61 +1,83 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BASE_URL } from "@/services/http";
 
-export type Role = "user" | "club-leader" | "co-leader" | "super-admin" | null;
+export type Role =
+  | "user"
+  | "club-leader"
+  | "co-leader"
+  | "super-admin"
+  | null;
 
 export type AuthState = {
   loading: boolean;
   role: Role;
   email: string | null;
-  token: string | null;
   clubId: string | null;
 };
-
-function readCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(name + "="));
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
 
 export function useAuth(): AuthState {
   const [auth, setAuth] = useState<AuthState>({
     loading: true,
     role: null,
     email: null,
-    token: null,
     clubId: null,
   });
 
   useEffect(() => {
-    const roleCookie = readCookie("role");
+    let cancelled = false;
 
-    const role: Role =
-      roleCookie === "user" ||
-      roleCookie === "club-leader" ||
-      roleCookie === "co-leader" ||
-      roleCookie === "super-admin"
-        ? (roleCookie as Role)
-        : null;
+    (async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/me`, {
+          credentials: "include",
+        });
 
-    const email = readCookie("email");
-    const token = readCookie("token");
-    const clubId = readCookie("clubId");
+        if (!res.ok) {
+          if (!cancelled) {
+            setAuth({
+              loading: false,
+              role: null,
+              email: null,
+              clubId: null,
+            });
+          }
+          return;
+        }
 
-    setAuth({
-      loading: false,
-      role,
-      email,
-      token,
-      clubId,
-    });
+        const data = await res.json();
+
+        if (!cancelled) {
+          setAuth({
+            loading: false,
+            role: (data.user?.role ?? null) as Role,
+            email: data.user?.email ?? null,
+            clubId: data.user?.clubId ?? null,
+          });
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setAuth({
+            loading: false,
+            role: null,
+            email: null,
+            clubId: null,
+          });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return auth;
 }
 
+// ถ้าอยากได้ role อย่างเดียว
 export function useRole(): Role {
-  return useAuth().role;
+  const { role } = useAuth();
+  return role;
 }

@@ -19,8 +19,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     role === "super-admin" || role === "club-leader" || role === "co-leader";
 
   useEffect(() => {
-    if (loading) return;       // รออ่าน cookie ให้จบก่อน
-    if (isPublic) return;      // หน้า public ไม่ต้องบังคับ login
+    if (loading) return;       
+    if (isPublic) return;      
 
     if (!isAdminRole) {
       router.replace("/admin/login");
