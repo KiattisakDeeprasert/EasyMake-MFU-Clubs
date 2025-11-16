@@ -52,11 +52,17 @@ export function AdminLoginCard() {
         return;
       }
 
-      // ✅ Store clubId in localStorage for quick frontend access
+      const maxAge = 7 * 24 * 60 * 60; // 7 วัน
+
+      document.cookie = `role=${result.user.role}; path=/; max-age=${maxAge}`;
+      document.cookie = `email=${encodeURIComponent(
+        result.user.email
+      )}; path=/; max-age=${maxAge}`;
+
       if (result.user.clubId) {
-        localStorage.setItem("clubId", result.user.clubId);
+        document.cookie = `clubId=${result.user.clubId}; path=/; max-age=${maxAge}`;
       } else {
-        localStorage.removeItem("clubId");
+        document.cookie = `clubId=; path=/; max-age=0`;
       }
 
       router.push("/admin/");
