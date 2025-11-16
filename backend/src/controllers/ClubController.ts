@@ -188,4 +188,13 @@ export const ClubController = {
       next(err as any);
     }
   },
+  
+   listPublicClubs: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const clubs = await ClubService.listPublicClubs();
+      res.json({ clubs });
+    } catch (err: unknown) {
+      next(err as any);
+    }
+  },
 };

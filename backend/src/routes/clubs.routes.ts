@@ -209,4 +209,6 @@ router.get(
   ClubController.getMyFollowingClubs
 );
 
+router.get("/clubs/public", ClubController.listPublicClubs);
+
 export default router;
