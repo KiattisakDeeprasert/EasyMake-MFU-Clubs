@@ -65,16 +65,14 @@ export default function NotificationMenu({
   function handleItemClick(item: NotificationUIItem) {
     onItemClick?.(item);
     setSelectedItem(item);
+    setDialogOpen(true);
+    setOpen(false);
   }
 
   return (
     <>
       <div className="relative" ref={ref}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setOpen((v) => !v)}
-        >
+        <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)}>
           <div className="relative">
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
