@@ -8,13 +8,14 @@ import NotificationMenu, {
 
 export function NotificationBellContainer() {
   const router = useRouter();
-  const { items, unreadCount, markAllAsRead } =
+  const { items, unreadCount,handleItemClick, markAllAsRead } =
     useNotifications();
 
   return (
     <NotificationMenu
       items={items as NotificationUIItem[]}
       unreadCount={unreadCount}
+      onItemClick={handleItemClick}
       onMarkAllRead={markAllAsRead}
     />
   );
