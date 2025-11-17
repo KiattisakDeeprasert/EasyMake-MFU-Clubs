@@ -24,7 +24,7 @@ export default function ClubsToolbar({
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto pt-4 px-1 md:px-0"
     >
-      {/* แถวเดียว: search (flex-1) + toggle (auto width) */}
+      {/* search (flex-1) + toggle (auto width) */}
       <div className="flex items-center gap-3 md:gap-4 w-full">
         {/* Search Bar */}
         <div className="relative flex-1">

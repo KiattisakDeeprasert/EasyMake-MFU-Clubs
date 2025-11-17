@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
       y: 0,
       transition: {
         duration: 0.35,
-        ease: "easeOut", // ✅ เปลี่ยนจาก array มาใช้ string ที่ type รองรับชัวร์
+        ease: "easeOut",
       },
     },
   };
@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
       </motion.header>
 
       {/* Role-specific Quick Cards */}
-      {role === "club-leader" && (
+      {(role === "club-leader" || role === "co-leader")  && (
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -109,13 +109,13 @@ export default function AdminDashboardPage() {
             />
           </motion.div>
 
-          <motion.div variants={itemVariants}>
+          {/* <motion.div variants={itemVariants}>
             <QuickCard
               title="Reports & Issues"
               desc="Handle reported posts, clubs or activities."
               href="/admin/system/reports"
             />
-          </motion.div>
+          </motion.div> */}
         </motion.div>
       )}
 

@@ -81,8 +81,8 @@ export default function FeaturedClubsSection({ clubs, loading, error }: Props) {
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                         <Users className="w-4 h-4" />
                         <span>
-                          {club.members?.length
-                            ? `${club.members.length} members`
+                          {club.followerCount
+                            ? `${club.followerCount} members`
                             : "No member info"}
                         </span>
                       </div>

@@ -45,7 +45,7 @@ export function PostsTable({
               <td className="px-4 py-3">
                 {post.published ? (
                   <span className="inline-flex items-center rounded-md bg-green-100 text-green-800 text-[11px] font-medium px-2 py-1">
-                    Yes
+                    Published
                   </span>
                 ) : (
                   <span className="inline-flex items-center rounded-md bg-gray-200 text-gray-700 text-[11px] font-medium px-2 py-1">
