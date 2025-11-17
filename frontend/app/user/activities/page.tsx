@@ -25,6 +25,7 @@ import {
 import { PostFeedCard } from "@/components/user/activities/PostFeedCard";
 import { ActivityCard } from "@/components/user/activities/ActivityCard";
 import { FeedFilterToggle } from "@/components/user/activities/FeedFilterToggle";
+import { getCookie } from "cookies-next";
 
 type FilterMode = "all" | "following";
 
@@ -46,7 +47,7 @@ export default function ActivitiesPage() {
   const [followedClubIds, setFollowedClubIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+  useEffect(() => {
     (async () => {
       setLoading(true);
 
@@ -72,10 +73,7 @@ export default function ActivitiesPage() {
         following = await getMyFollowingClubs();
       } catch (err: any) {
         const msg = String(err?.message || "");
-        if (
-          msg.toLowerCase().includes("unauthorized") ||
-          msg.includes("401")
-        ) {
+        if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
           following = [];
         } else {
           console.error("load following clubs error", err);
@@ -89,7 +87,6 @@ export default function ActivitiesPage() {
       setLoading(false);
     })();
   }, []);
-
 
   useEffect(() => {
     setVisiblePostsCount(5);
@@ -132,6 +129,12 @@ export default function ActivitiesPage() {
 
   // like post
   const handleToggleLike = async (postId: string) => {
+    const token = getCookie("token");
+    if (!token) {
+      redirectToLogin();
+      return;
+    }
+
     try {
       const result = await togglePostLike(postId);
       setPosts((prev) =>
@@ -141,12 +144,7 @@ export default function ActivitiesPage() {
             : p
         )
       );
-    } catch (err: any) {
-      const msg = String(err?.message || "");
-      if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
-        redirectToLogin();
-        return;
-      }
+    } catch (err) {
       console.error("toggle like error", err);
     }
   };
