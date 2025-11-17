@@ -162,12 +162,12 @@ export function AdminSidebar() {
                 label="Create Club Leaders"
                 isActive={pathname === "/admin/system/leaders"}
               />
-              <NavItem
+              {/* <NavItem
                 href="/admin/system/reports"
                 icon={Flag}
                 label="Reports"
                 isActive={pathname === "/admin/system/reports"}
-              />
+              /> */}
             </>
           )}
         </nav>
