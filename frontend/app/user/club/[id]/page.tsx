@@ -220,7 +220,7 @@ export default function ClubDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [clubId, loggedIn]); 
+  }, [clubId, loggedIn]);
 
   const handleToggleFollow = async () => {
     if (!authChecked) return;
@@ -382,7 +382,16 @@ export default function ClubDetailPage() {
       <Navigation />
 
       {/* hero section + follow button (เหมือนเดิม) */}
-      <section className="relative h-[60vh] min-h-[480px] overflow-hidden pt-16">
+      <section
+        className="
+    relative 
+    h-[60vh] 
+    min-h-[480px] 
+    overflow-hidden 
+    pt-24           /* mobile + ipad: ดันลงล่างขึ้นนิดนึง */
+    lg:pt-16        /* desktop: กลับไปเท่าเดิม */
+  "
+      >
         <div className="absolute inset-0">
           <Image
             src={club.cover_image_url || "/placeholder.svg"}
@@ -394,6 +403,7 @@ export default function ClubDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
         </div>
 
+        {/* ปุ่ม Back เหมือนเดิมทุกขนาดหน้าจอ */}
         <div className="absolute top-20 left-4 z-20">
           <Button
             asChild
@@ -408,12 +418,12 @@ export default function ClubDetailPage() {
           </Button>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 h-full flex items-end pb-12">
+        <div className="container mx-auto px-4 relative z-10 h-full flex items-end pb-10 lg:pb-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="w-full ml-[20px] md:ml-[30px] lg:ml-[40px]"
+            className="w-full ml-4 md:ml-6 lg:ml-[40px]" // desktop = ของเดิม
           >
             <div className="flex flex-col md:flex-row gap-6 items-start md:items-end">
               <div className="flex-1 space-y-4">
@@ -421,11 +431,31 @@ export default function ClubDetailPage() {
                   <Badge className="bg-primary text-background border-0 capitalize">
                     Club
                   </Badge>
-                  <h1 className="font-playfair text-4xl md:text-6xl font-bold">
+
+                  {/* mobile / ipad เล็กลง, desktop เท่าเดิม */}
+                  <h1
+                    className="
+                font-playfair 
+                font-bold
+                text-3xl       /* mobile */
+                md:text-4xl    /* ipad / tablet */
+                lg:text-6xl    /* desktop = เดิมเป๊ะ */
+              "
+                  >
                     {club.name}
                   </h1>
+
                   {club.description && (
-                    <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
+                    <p
+                      className="
+                  text-sm            /* mobile อ่านง่ายขึ้น ไม่ดันยาวเกิน */
+                  md:text-base       /* ipad */
+                  lg:text-lg         /* desktop = เดิม */
+                  text-muted-foreground 
+                  max-w-3xl 
+                  leading-relaxed
+                "
+                    >
                       {club.description}
                     </p>
                   )}
@@ -505,7 +535,9 @@ export default function ClubDetailPage() {
                           Members
                         </div>
                         <div className="font-medium">
-                          {typeof club.followerCount === "number" ? club.followerCount : 0}
+                          {typeof club.followerCount === "number"
+                            ? club.followerCount
+                            : 0}
                         </div>
                       </div>
                     </div>
