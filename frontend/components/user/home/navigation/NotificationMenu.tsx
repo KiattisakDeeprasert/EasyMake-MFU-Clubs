@@ -63,9 +63,8 @@ export default function NotificationMenu({
   const visibleItems = filter === "unread" ? unreadItems : readItems;
 
   function handleItemClick(item: NotificationUIItem) {
-    onItemClick?.(item); // ให้ logic เดิม (เช่น mark read) ทำงานปกติ
+    onItemClick?.(item);
     setSelectedItem(item);
-    setDialogOpen(true);
   }
 
   return (

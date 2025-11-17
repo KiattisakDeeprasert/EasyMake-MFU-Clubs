@@ -8,7 +8,7 @@ import NotificationMenu, {
 
 export function NotificationBellContainer() {
   const router = useRouter();
-  const { items, unreadCount, handleItemClick, markAllAsRead } =
+  const { items, unreadCount, markAllAsRead } =
     useNotifications();
 
   return (
@@ -16,13 +16,6 @@ export function NotificationBellContainer() {
       items={items as NotificationUIItem[]}
       unreadCount={unreadCount}
       onMarkAllRead={markAllAsRead}
-      onItemClick={async (item) => {
-        await handleItemClick(item);
-
-        if (item.link_url) {
-          router.push(item.link_url);
-        }
-      }}
     />
   );
 }
