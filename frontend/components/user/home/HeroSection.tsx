@@ -97,7 +97,7 @@ export default function HeroSection() {
                 <div className="font-semibold text-foreground">
                   For all years
                 </div>
-                <div>Freshman to senior — find clubs that match your vibe.</div>
+                <div>Freshman to senior find clubs that match your vibe.</div>
               </div>
               <div>
                 <div className="font-semibold text-foreground">

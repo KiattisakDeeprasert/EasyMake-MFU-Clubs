@@ -34,8 +34,8 @@ export default function LoginPage() {
           <GoogleDomainLogin allowedDomain="lamduan.mfu.ac.th" onSuccessRoute="/user" />
         </motion.div>
 
-        <motion.div className="mt-8 text-center text-xs text-gray-400" variants={item}>
-          Already have an account? <Link href="/user" className="underline">Go to user page</Link>
+        <motion.div className="mt-8 text-center text-xs text-gray-500" variants={item}>
+          Already have an account? <Link href="/user" className="underline text-black font-bold hover:text-gray-600 transition-colors">Go to home page</Link>
         </motion.div>
       </motion.div>
     </div>

@@ -1,4 +1,3 @@
-// src/services/NotificationService.ts
 import { NotificationModel } from "../models/Notification.model";
 import { buildNotificationEmail } from "../utils/emailTemplate";
 import { UserModel } from "../models/User.model";
