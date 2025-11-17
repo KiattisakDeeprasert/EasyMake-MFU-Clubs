@@ -40,16 +40,24 @@ export default function NotificationMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
+  const [localItems, setLocalItems] = useState<NotificationUIItem[]>(items);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
   // dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<NotificationUIItem | null>(
     null
   );
 
-  const unreadItems = items.filter((n) => !n.is_read);
-  const readItems = items.filter((n) => n.is_read);
+  const unreadItems = localItems.filter((n) => !n.is_read);
+  const readItems = localItems.filter((n) => n.is_read);
 
   const [filter, setFilter] = useState<"unread" | "read">("unread");
+
+  const effectiveUnreadCount = unreadItems.length;
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -64,9 +72,27 @@ export default function NotificationMenu({
 
   function handleItemClick(item: NotificationUIItem) {
     onItemClick?.(item);
+
+    setLocalItems((prev) =>
+      prev.map((n) =>
+        n.id === item.id
+          ? {
+              ...n,
+              is_read: true,
+            }
+          : n
+      )
+    );
+
     setSelectedItem(item);
     setDialogOpen(true);
     setOpen(false);
+  }
+
+  function handleMarkAll() {
+    setLocalItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+    onMarkAllRead?.();
   }
 
   return (
@@ -75,9 +101,9 @@ export default function NotificationMenu({
         <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)}>
           <div className="relative">
             <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
+            {effectiveUnreadCount > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center px-0.5">
-                {unreadCount > 9 ? "9+" : unreadCount}
+                {effectiveUnreadCount > 9 ? "9+" : effectiveUnreadCount}
               </span>
             )}
           </div>
@@ -123,10 +149,10 @@ export default function NotificationMenu({
                     Read
                   </button>
 
-                  {unreadCount > 0 && onMarkAllRead && (
+                  {effectiveUnreadCount > 0 && onMarkAllRead && (
                     <button
                       className="ml-2 text-[11px] text-primary hover:underline"
-                      onClick={() => onMarkAllRead()}
+                      onClick={handleMarkAll}
                     >
                       Mark all
                     </button>
@@ -171,7 +197,6 @@ export default function NotificationMenu({
         </AnimatePresence>
       </div>
 
-      {/* Dialog แสดงรายละเอียด notification */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           {selectedItem && (
