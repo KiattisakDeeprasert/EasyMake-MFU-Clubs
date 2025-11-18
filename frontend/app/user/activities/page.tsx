@@ -25,6 +25,7 @@ import {
 import { PostFeedCard } from "@/components/user/activities/PostFeedCard";
 import { ActivityCard } from "@/components/user/activities/ActivityCard";
 import { FeedFilterToggle } from "@/components/user/activities/FeedFilterToggle";
+import { getMe } from "@/services/authService";
 
 type FilterMode = "all" | "following";
 
@@ -46,7 +47,12 @@ export default function ActivitiesPage() {
   const [followedClubIds, setFollowedClubIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+  useEffect(() => {
+    const hasRoleCookie = () => {
+      if (typeof document === "undefined") return false;
+      return document.cookie.split("; ").some((row) => row.startsWith("role="));
+    };
+
     (async () => {
       setLoading(true);
 
@@ -68,18 +74,22 @@ export default function ActivitiesPage() {
         actFeed = [];
       }
 
-      try {
-        following = await getMyFollowingClubs();
-      } catch (err: any) {
-        const msg = String(err?.message || "");
-        if (
-          msg.toLowerCase().includes("unauthorized") ||
-          msg.includes("401")
-        ) {
-          following = [];
-        } else {
-          console.error("load following clubs error", err);
+      if (hasRoleCookie()) {
+        try {
+          following = await getMyFollowingClubs();
+        } catch (err: any) {
+          const msg = String(err?.message || "");
+          if (
+            msg.toLowerCase().includes("unauthorized") ||
+            msg.includes("401")
+          ) {
+            following = [];
+          } else {
+            console.error("load following clubs error", err);
+          }
         }
+      } else {
+        following = [];
       }
 
       setPosts(postFeed);
@@ -89,7 +99,6 @@ export default function ActivitiesPage() {
       setLoading(false);
     })();
   }, []);
-
 
   useEffect(() => {
     setVisiblePostsCount(5);
@@ -133,7 +142,15 @@ export default function ActivitiesPage() {
   // like post
   const handleToggleLike = async (postId: string) => {
     try {
+      const me = await getMe();
+
+      if (!me) {
+        redirectToLogin();
+        return;
+      }
+
       const result = await togglePostLike(postId);
+
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
@@ -142,11 +159,6 @@ export default function ActivitiesPage() {
         )
       );
     } catch (err: any) {
-      const msg = String(err?.message || "");
-      if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
-        redirectToLogin();
-        return;
-      }
       console.error("toggle like error", err);
     }
   };
