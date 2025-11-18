@@ -4,6 +4,9 @@ import Providers from "./providers";
 export const metadata = {
   title: "EasyMake MFU Clubs",
   description: "A club management platform for MFU students",
+   icons: {
+    icon: "/logo.ico", 
+  },
 };
 
 export default function RootLayout({
