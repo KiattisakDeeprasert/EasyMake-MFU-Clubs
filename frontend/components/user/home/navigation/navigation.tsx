@@ -20,7 +20,20 @@ export function Navigation() {
   useEffect(() => {
     let cancelled = false;
 
+    const hasRoleCookie = () => {
+      if (typeof document === "undefined") return false;
+      return document.cookie.split("; ").some((row) => row.startsWith("role="));
+    };
+
     (async () => {
+      if (!hasRoleCookie()) {
+        if (!cancelled) {
+          setIsLoggedIn(false);
+          setChecking(false);
+        }
+        return;
+      }
+
       try {
         const me = await getMe();
         if (!cancelled) {
@@ -69,10 +82,7 @@ export function Navigation() {
             </Button>
 
             {/* logo desktop */}
-            <Link
-              href="/user"
-              className="hidden md:flex items-center gap-2"
-            >
+            <Link href="/user" className="hidden md:flex items-center gap-2">
               <div className="relative w-20 h-20">
                 <Image
                   src="/brand-icon.png"
@@ -146,11 +156,7 @@ export function Navigation() {
                     <UserMenu />
                   </>
                 ) : (
-                  <Button
-                    asChild
-                    variant="default"
-                    size="sm"
-                  >
+                  <Button asChild variant="default" size="sm">
                     <Link href="/user/auth/login">Login</Link>
                   </Button>
                 )}
